@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
   AreaChart, Area, PieChart, Pie, Cell, ScatterChart, Scatter, ZAxis, BarChart, Bar 
@@ -123,10 +123,10 @@ export default function Metrics() {
                   innerRadius={60} outerRadius={80}
                   paddingAngle={5}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
                   labelLine={false}
                 >
-                  {metrics.weightage.map((entry, index) => (
+                  {metrics.weightage.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
