@@ -1,0 +1,39 @@
+/* Dashboard page styles */
+
+.flare-list-row {
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.flare-list-row:hover {
+  background: var(--bg-elevated);
+}
+
+.orbital-scrubber-wrapper {
+  position: relative;
+}
+
+/* Custom range slider styling */
+input[type=range] {
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  margin-top: -6px;
+  box-shadow: 0 0 10px rgba(216, 72, 30, 0.3);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  background: var(--border);
+  border-radius: 2px;
+}

@@ -1,0 +1,494 @@
+{
+  "detected": 151,
+  "noaa_events": 44,
+  "true_positives": 37,
+  "false_positives": 114,
+  "false_negatives": 37,
+  "precision": 0.245,
+  "recall": 0.5,
+  "f1_score": 0.329,
+  "tolerance_minutes": 10,
+  "matches": [
+    {
+      "our_flare_id": 91,
+      "our_class": "C",
+      "our_time": "2026-07-05T03:07:01.940000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 03:16:00+00:00",
+      "delta_minutes": 9.0
+    },
+    {
+      "our_flare_id": 92,
+      "our_class": "C",
+      "our_time": "2026-07-05T03:08:18.940000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 03:16:00+00:00",
+      "delta_minutes": 7.7
+    },
+    {
+      "our_flare_id": 93,
+      "our_class": "C",
+      "our_time": "2026-07-05T03:10:55.940000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 03:16:00+00:00",
+      "delta_minutes": 5.1
+    },
+    {
+      "our_flare_id": 94,
+      "our_class": "C",
+      "our_time": "2026-07-05T03:12:17.940000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 03:16:00+00:00",
+      "delta_minutes": 3.7
+    },
+    {
+      "our_flare_id": 105,
+      "our_class": "C",
+      "our_time": "2026-07-05T05:28:32.940000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 05:21:00+00:00",
+      "delta_minutes": 7.5
+    },
+    {
+      "our_flare_id": 114,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:08.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.1
+    },
+    {
+      "our_flare_id": 115,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:13.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.2
+    },
+    {
+      "our_flare_id": 116,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:17.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.3
+    },
+    {
+      "our_flare_id": 117,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:24.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.4
+    },
+    {
+      "our_flare_id": 118,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:28.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.5
+    },
+    {
+      "our_flare_id": 119,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:35.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.6
+    },
+    {
+      "our_flare_id": 120,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:46.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.8
+    },
+    {
+      "our_flare_id": 121,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:28:51.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 7.9
+    },
+    {
+      "our_flare_id": 122,
+      "our_class": "B",
+      "our_time": "2026-07-05T16:28:59.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 8.0
+    },
+    {
+      "our_flare_id": 123,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:29:40.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 8.7
+    },
+    {
+      "our_flare_id": 124,
+      "our_class": "C",
+      "our_time": "2026-07-05T16:29:44.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 16:21:00+00:00",
+      "delta_minutes": 8.7
+    },
+    {
+      "our_flare_id": 125,
+      "our_class": "M",
+      "our_time": "2026-07-05T17:55:19.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 17:51:00+00:00",
+      "delta_minutes": 4.3
+    },
+    {
+      "our_flare_id": 126,
+      "our_class": "C",
+      "our_time": "2026-07-05T17:56:45.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 17:51:00+00:00",
+      "delta_minutes": 5.8
+    },
+    {
+      "our_flare_id": 127,
+      "our_class": "C",
+      "our_time": "2026-07-05T17:57:07.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 17:51:00+00:00",
+      "delta_minutes": 6.1
+    },
+    {
+      "our_flare_id": 128,
+      "our_class": "B",
+      "our_time": "2026-07-05T17:57:20.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 17:51:00+00:00",
+      "delta_minutes": 6.3
+    },
+    {
+      "our_flare_id": 129,
+      "our_class": "C",
+      "our_time": "2026-07-05T21:18:10.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 21:14:00+00:00",
+      "delta_minutes": 4.2
+    },
+    {
+      "our_flare_id": 130,
+      "our_class": "M",
+      "our_time": "2026-07-05T21:18:15.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 21:14:00+00:00",
+      "delta_minutes": 4.3
+    },
+    {
+      "our_flare_id": 131,
+      "our_class": "M",
+      "our_time": "2026-07-05T21:18:20.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 21:14:00+00:00",
+      "delta_minutes": 4.3
+    },
+    {
+      "our_flare_id": 132,
+      "our_class": "M",
+      "our_time": "2026-07-05T21:19:03.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 21:14:00+00:00",
+      "delta_minutes": 5.1
+    },
+    {
+      "our_flare_id": 133,
+      "our_class": "B",
+      "our_time": "2026-07-05T21:19:42.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 21:14:00+00:00",
+      "delta_minutes": 5.7
+    },
+    {
+      "our_flare_id": 134,
+      "our_class": "B",
+      "our_time": "2026-07-05T21:19:46.550000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 21:14:00+00:00",
+      "delta_minutes": 5.8
+    },
+    {
+      "our_flare_id": 135,
+      "our_class": "B",
+      "our_time": "2026-07-07T14:16:40.722000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-07 14:09:00+00:00",
+      "delta_minutes": 7.7
+    },
+    {
+      "our_flare_id": 136,
+      "our_class": "C",
+      "our_time": "2026-07-07T14:16:45.722000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-07 14:09:00+00:00",
+      "delta_minutes": 7.8
+    },
+    {
+      "our_flare_id": 137,
+      "our_class": "C",
+      "our_time": "2026-07-07T14:16:52.722000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-07 14:09:00+00:00",
+      "delta_minutes": 7.9
+    },
+    {
+      "our_flare_id": 138,
+      "our_class": "C",
+      "our_time": "2026-07-07T14:17:56.722000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-07 14:09:00+00:00",
+      "delta_minutes": 8.9
+    },
+    {
+      "our_flare_id": 139,
+      "our_class": "M",
+      "our_time": "2026-07-07T14:18:04.722000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-07 14:09:00+00:00",
+      "delta_minutes": 9.1
+    },
+    {
+      "our_flare_id": 140,
+      "our_class": "M",
+      "our_time": "2026-07-07T14:18:15.722000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-07 14:09:00+00:00",
+      "delta_minutes": 9.3
+    },
+    {
+      "our_flare_id": 141,
+      "our_class": "M",
+      "our_time": "2026-07-07T14:18:36.722000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-07 14:09:00+00:00",
+      "delta_minutes": 9.6
+    },
+    {
+      "our_flare_id": 143,
+      "our_class": "C",
+      "our_time": "2026-07-08T17:53:19.704000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-08 17:49:00+00:00",
+      "delta_minutes": 4.3
+    },
+    {
+      "our_flare_id": 144,
+      "our_class": "C",
+      "our_time": "2026-07-08T17:53:24.704000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-08 17:49:00+00:00",
+      "delta_minutes": 4.4
+    },
+    {
+      "our_flare_id": 145,
+      "our_class": "C",
+      "our_time": "2026-07-08T17:53:38.704000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-08 17:49:00+00:00",
+      "delta_minutes": 4.6
+    },
+    {
+      "our_flare_id": 146,
+      "our_class": "C",
+      "our_time": "2026-07-08T17:53:44.704000+00:00",
+      "noaa_class": "",
+      "noaa_time": "2026-07-08 17:49:00+00:00",
+      "delta_minutes": 4.7
+    }
+  ],
+  "missed_by_us": [
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-04 20:29:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-04 22:16:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-04 23:32:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 00:24:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 01:09:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 04:19:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 04:41:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 06:10:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 07:11:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 07:21:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 08:20:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 08:49:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 10:42:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 10:56:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 11:04:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 11:53:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 12:52:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 14:17:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 14:28:00+00:00"
+    },
+    {
+      "noaa_class": "",
+      "noaa_time": "2026-07-05 15:05:00+00:00"
+    }
+  ],
+  "spurious": [
+    {
+      "our_flare_id": 1,
+      "our_class": "C",
+      "our_time": "2026-07-02T01:51:46.299000+00:00"
+    },
+    {
+      "our_flare_id": 2,
+      "our_class": "X",
+      "our_time": "2026-07-02T01:51:50.299000+00:00"
+    },
+    {
+      "our_flare_id": 3,
+      "our_class": "M",
+      "our_time": "2026-07-02T01:53:30.299000+00:00"
+    },
+    {
+      "our_flare_id": 4,
+      "our_class": "M",
+      "our_time": "2026-07-02T01:53:37.299000+00:00"
+    },
+    {
+      "our_flare_id": 5,
+      "our_class": "C",
+      "our_time": "2026-07-02T01:53:58.299000+00:00"
+    },
+    {
+      "our_flare_id": 6,
+      "our_class": "C",
+      "our_time": "2026-07-02T01:54:02.299000+00:00"
+    },
+    {
+      "our_flare_id": 7,
+      "our_class": "X",
+      "our_time": "2026-07-02T10:25:13.299000+00:00"
+    },
+    {
+      "our_flare_id": 8,
+      "our_class": "X",
+      "our_time": "2026-07-02T10:25:18.299000+00:00"
+    },
+    {
+      "our_flare_id": 9,
+      "our_class": "M",
+      "our_time": "2026-07-02T10:25:22.299000+00:00"
+    },
+    {
+      "our_flare_id": 10,
+      "our_class": "M",
+      "our_time": "2026-07-02T10:25:26.299000+00:00"
+    },
+    {
+      "our_flare_id": 11,
+      "our_class": "X",
+      "our_time": "2026-07-02T10:25:32.299000+00:00"
+    },
+    {
+      "our_flare_id": 12,
+      "our_class": "C",
+      "our_time": "2026-07-02T10:26:20.299000+00:00"
+    },
+    {
+      "our_flare_id": 13,
+      "our_class": "C",
+      "our_time": "2026-07-02T23:11:14.782000+00:00"
+    },
+    {
+      "our_flare_id": 14,
+      "our_class": "M",
+      "our_time": "2026-07-02T23:11:24.782000+00:00"
+    },
+    {
+      "our_flare_id": 15,
+      "our_class": "C",
+      "our_time": "2026-07-02T23:11:36.782000+00:00"
+    },
+    {
+      "our_flare_id": 16,
+      "our_class": "M",
+      "our_time": "2026-07-03T12:10:38.115000+00:00"
+    },
+    {
+      "our_flare_id": 17,
+      "our_class": "M",
+      "our_time": "2026-07-03T12:11:04.115000+00:00"
+    },
+    {
+      "our_flare_id": 18,
+      "our_class": "C",
+      "our_time": "2026-07-03T12:11:20.115000+00:00"
+    },
+    {
+      "our_flare_id": 19,
+      "our_class": "M",
+      "our_time": "2026-07-03T12:11:25.115000+00:00"
+    },
+    {
+      "our_flare_id": 20,
+      "our_class": "C",
+      "our_time": "2026-07-03T12:11:35.115000+00:00"
+    }
+  ],
+  "note": "Results are approximate \u2014 HEL1OS energy band differs from GOES. Timing differences may reflect propagation, instrument sensitivity, or threshold tuning."
+}
