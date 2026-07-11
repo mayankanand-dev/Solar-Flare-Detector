@@ -1,0 +1,1 @@
+{"lightcurve": {"total_rows": 812955, "time_start": "2026-07-02 00:00:06.299000+00:00", "time_end": "2026-07-10 23:59:45.761000+00:00", "duration_hours": 216.0, "flux_min": 0.0, "flux_max": 5205.0, "flux_median": 0.0}, "flares": {"total": 151, "by_class": {"C": 97, "X": 9, "M": 26, "B": 19}}, "source": "Ensemble Fusion (50% HEL1OS, 50% SoLEXS)"}

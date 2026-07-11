@@ -1,5 +1,5 @@
-// API base URL — proxied via Vite in dev, environment variable in prod
-export const API_BASE = import.meta.env.VITE_API_URL || '/api'
+// API base URL — pointing to the static data folder
+export const API_BASE = '/data'
 
 export interface FlareEvent {
   id: number
@@ -102,21 +102,72 @@ async function apiFetch<T>(path: string): Promise<T> {
 }
 
 export const api = {
-  getLightcurve: (downsample = 2000): Promise<LightcurveData> =>
-    apiFetch(`/lightcurve?downsample=${downsample}`),
+  getLightcurve: (_downsample = 2000): Promise<LightcurveData> =>
+    apiFetch('/lightcurve.json'),
 
   getFlares: (): Promise<{ flares: FlareEvent[]; count: number; meta: Record<string, unknown> }> =>
-    apiFetch('/flares'),
-
-  getFlareDetail: (id: number): Promise<FlareDetail> =>
-    apiFetch(`/flares/${id}`),
-
-  getReplayStatus: (): Promise<ReplayStatus> =>
-    apiFetch('/replay/status'),
+    apiFetch('/flares.json'),
 
   getStats: (): Promise<Stats> =>
-    apiFetch('/stats'),
+    apiFetch('/stats.json'),
 
   getMetrics: (): Promise<MetricsData> =>
-    apiFetch('/metrics'),
+    apiFetch('/metrics.json'),
+
+  // Simulated endpoints for static hosting
+  getFlareDetail: async (id: number): Promise<FlareDetail> => {
+    const [flaresRes, lcRes] = await Promise.all([
+      api.getFlares(),
+      api.getLightcurve()
+    ])
+    
+    const flare = flaresRes.flares.find(f => f.id === id)
+    if (!flare) throw new Error('Flare not found')
+
+    // Find a window in the lightcurve (roughly around the flare peak)
+    // The peak time is flare.peak_time
+    const peakTime = new Date(flare.peak_time).getTime()
+    
+    // Simulate 1 hour before and 2 hours after
+    const startWindow = peakTime - (1 * 60 * 60 * 1000)
+    const endWindow = peakTime + (2 * 60 * 60 * 1000)
+
+    const windowTimestamps: string[] = []
+    const windowFlux: number[] = []
+
+    for (let i = 0; i < lcRes.timestamps.length; i++) {
+      const t = new Date(lcRes.timestamps[i]).getTime()
+      if (t >= startWindow && t <= endWindow) {
+        windowTimestamps.push(lcRes.timestamps[i])
+        windowFlux.push(lcRes.flux[i])
+      }
+    }
+
+    return {
+      flare,
+      lightcurve_window: {
+        timestamps: windowTimestamps,
+        flux: windowFlux,
+        window_start: new Date(startWindow).toISOString(),
+        window_end: new Date(endWindow).toISOString()
+      }
+    }
+  },
+
+  getReplayStatus: async (): Promise<ReplayStatus> => {
+    // Static mock for replay status since there is no backend
+    return {
+      current_idx: 0,
+      current_time: new Date().toISOString(),
+      current_flux: 0,
+      flare_active: false,
+      active_flare: null,
+      replay_speed_x: 1,
+      started_at: null,
+      total_samples: 1000,
+      progress_pct: 0,
+      mode: "Static Serverless Mode",
+      disclaimer: "Live replay requires local backend"
+    }
+  }
 }
