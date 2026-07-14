@@ -2,8 +2,6 @@
 
 **Solar Flare Detector** is a local, offline-first dashboard I built that ingests real X-ray light-curve data from ISRO's Aditya-L1 mission (HEL1OS and SoLEXS instruments), runs my custom flare-detection algorithm, and serves the results through a live-feeling animated dashboard.
 
-I designed this project for my college exhibitions, so the entire system runs locally on my machine without requiring a live internet connection during the demo.
-
 ## Features
 
 - **Real Mission Data**: Processes FITS lightcurve files from the Aditya-L1 mission.
