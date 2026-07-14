@@ -12,6 +12,56 @@ Designed for college exhibitions, the entire system runs locally on your machine
 - **Interactive Dashboard**: Features an animated sun that reacts to flare classes, a scrolling flux chart, and detailed event timelines.
 - **Validation**: Automatically cross-checks detected flares against NOAA's GOES event catalog for ground-truth comparison.
 
+## Mathematical & Physical Foundation
+
+The core of the project relies on processing X-ray flux to detect sudden, intense variations in solar energy output. 
+
+### 1. Data Source & Physics
+The instruments onboard Aditya-L1, such as HEL1OS, measure hard X-ray emissions in the 12–200 keV energy band. Solar flares manifest as rapid increases in these X-ray counts. To detect these flares automatically, the algorithm must separate the "quiet Sun" background radiation from transient high-energy spikes.
+
+### 2. The Flare Detection Algorithm
+The pipeline uses a robust **Rolling Baseline + k-σ Spike Detection** algorithm:
+
+- **Rolling Baseline ($B$)**: A rolling median is computed over a configurable time window (default 90 minutes). The median is resistant to extreme outliers and accurately represents the quiet background flux.
+- **Rolling Standard Deviation ($\sigma$)**: The local standard deviation of the flux is computed over the same window, representing the natural statistical variation (noise) of the instrument and the quiet Sun.
+- **Detection Trigger**: A candidate flare sample is flagged when the observed flux ($F$) exceeds the background by a factor $k$ of the standard deviation:
+  $$F \ge B + k \cdot \sigma$$
+  *(Default $k = 3.0$)*
+- **Noise Rejection**: To reject random instrument noise, a flare is only confirmed if the flux remains above the threshold for a minimum number of consecutive samples (default 3 samples).
+- **Decay Tracking**: The flare event is considered active until the flux decays back below a lower threshold:
+  $$F < B + 1.5 \cdot \sigma$$
+
+### 3. Flare Classification
+Solar flares are traditionally classified using the GOES A/B/C/M/X scale based on the 1–8 Å band. Since HEL1OS operates in a different energy spectrum, this pipeline uses a statistical approximation based on the peak $\sigma$ above the baseline:
+- **X-Class (Extreme)**: Peak $\ge 10.0\sigma$
+- **M-Class (Strong)**: Peak $\ge 7.0\sigma$
+- **C-Class (Moderate)**: Peak $\ge 4.0\sigma$
+- **B-Class (Small)**: Peak $\ge 2.0\sigma$
+- **A-Class (Micro)**: Peak $< 2.0\sigma$
+
+## Dashboard & Visual Inferences
+
+### 1. Main Dashboard
+![Dashboard Overview](screenshots/dashboard.png)
+*(Live Flux Graph and Sun Animation)*
+- **Live Flux Graph**: Plots the raw X-ray flux against the computed baseline. You can visually infer when a flare occurs by observing the curve spike significantly above the baseline threshold.
+- **Sun Animation & Status**: The interactive 3D sun dynamically changes its visual state (glow, color intensity) based on the current detected flare class. An X-Class flare will trigger aggressive visual effects, instantly communicating severe solar activity without needing to read the numbers.
+
+### 2. Flare Timeline & Events
+![Flare Timeline](screenshots/flare_timeline.png)
+*(Detailed chronologic history of detected solar flares)*
+- **Event Tracking**: A chronological list tracks the start, peak, and decay phases of each flare. By cross-referencing the timeline with the graph, you can infer the duration and total energy release (area under the curve) of specific flare events.
+
+### 3. Accuracy & Metrics
+![Metrics](screenshots/metrics.png)
+*(Validation against NOAA GOES ground-truth data)*
+- **Automated Validation**: Displays performance metrics of the detection algorithm when compared with the GOES event catalog, showcasing the reliability of the local k-σ approach versus traditional thresholds.
+
+### 4. Educational Context
+![How It Works](screenshots/how_it_works.png)
+*(Detailed explanation of the physics involved)*
+- **How It Works & About Mission**: Additional pages provide users and exhibition attendees with the educational context behind the ISRO Aditya-L1 mission and the physics of X-ray solar emissions.
+
 ## Requirements
 
 - **Python 3.11+**
