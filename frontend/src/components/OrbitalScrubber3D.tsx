@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { PerspectiveCamera, Billboard, Text, Line } from '@react-three/drei'
+import { PerspectiveCamera, Billboard, Line, Html } from '@react-three/drei'
 import { Play, Pause } from 'lucide-react'
 import type { ReplayStatus, FlareEvent, LightcurveData } from '../api'
 
@@ -10,7 +10,7 @@ interface ScrubberProps {
   flares: FlareEvent[]
   lc: LightcurveData | null
   size?: number
-  onScrubTime?: (timestampMs: number) => void
+  onScrubTime?: (timestampMs: number, progressPct: number) => void
 }
 
 const CLASS_COLORS: Record<string, string> = {
@@ -203,11 +203,11 @@ function EarthSystem({ reducedMotion }: { reducedMotion: boolean }) {
             <meshStandardMaterial color="#4A90D9" side={THREE.DoubleSide} />
           </mesh>
           
-          <Billboard position={[0, 0.3, 0]}>
-            <Text fontSize={0.2} color="var(--text-secondary)" anchorX="center" anchorY="bottom">
+          <Html position={[0, 0.35, 0]} center>
+            <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-secondary)', whiteSpace: 'nowrap', pointerEvents: 'none', background: 'var(--bg-elevated)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', fontWeight: 600 }}>
               Aditya-L1
-            </Text>
-          </Billboard>
+            </div>
+          </Html>
         </group>
 
         {/* L1 Connection Line */}
@@ -237,22 +237,18 @@ function Scene({ isFlare, activeFlare, accentColor, reducedMotion }: any) {
       <Sun isFlare={isFlare} accentColor={accentColor} reducedMotion={reducedMotion} />
       <EarthSystem reducedMotion={reducedMotion} />
       
-      {/* Active Flare Info Billboard */}
+      {/* Active Flare Info Overlay */}
       {isFlare && activeFlare && (
-        <Billboard position={[0, 2.5, 0]}>
-          <group>
-            <mesh>
-              <planeGeometry args={[3, 1]} />
-              <meshBasicMaterial color="var(--bg-card)" opacity={0.9} transparent />
-            </mesh>
-            <Text position={[0, 0.15, 0.01]} fontSize={0.25} color={accentColor} fontWeight="bold">
+        <Html position={[0, 2.5, 0]} center>
+          <div style={{ background: 'var(--bg-card)', border: `1px solid ${accentColor}`, padding: '6px 12px', borderRadius: '6px', textAlign: 'center', boxShadow: `0 0 12px ${accentColor}60`, pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+            <div style={{ color: accentColor, fontWeight: 'bold', fontSize: '13px', fontFamily: 'sans-serif' }}>
               Class {activeFlare.flare_class} Flare
-            </Text>
-            <Text position={[0, -0.2, 0.01]} fontSize={0.2} color="var(--text-secondary)">
+            </div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '11px', fontFamily: 'monospace', marginTop: '2px' }}>
               Peak: {activeFlare.peak_flux.toFixed(0)} cts/s
-            </Text>
-          </group>
-        </Billboard>
+            </div>
+          </div>
+        </Html>
       )}
     </>
   )
@@ -277,7 +273,7 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onSc
     const startTimeMs = new Date(lc.time_range?.start || lc.timestamps[0]).getTime()
     const endTimeMs = new Date(lc.time_range?.end || lc.timestamps[lc.timestamps.length - 1]).getTime()
     const currentMs = startTimeMs + (manualProgressPct / 100) * (endTimeMs - startTimeMs)
-    onScrubTime(currentMs)
+    onScrubTime(currentMs, manualProgressPct)
   }, [lc, manualProgressPct, onScrubTime])
 
   const activeFlare = useMemo(() => {

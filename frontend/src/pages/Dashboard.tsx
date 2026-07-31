@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, RefreshCw, AlertTriangle, Activity } from 'lucide-react'
@@ -40,8 +40,13 @@ export default function Dashboard() {
     api.getPrediction().then(r => setPredictions(r.predictions || [])).catch(() => {})
   }, [])
 
-  // Synchronize probability gauge directly with scrubber timeline position
-  const handleScrubTime = (tsMs: number) => {
+  const [scrubPct, setScrubPct] = useState<number>(0)
+
+  // Synchronize probability gauge directly with scrubber timeline position without causing re-render loops
+  const handleScrubTime = useCallback((tsMs: number, progressPct?: number) => {
+    if (progressPct !== undefined) {
+      setScrubPct(prev => Math.abs(prev - progressPct) < 0.05 ? prev : progressPct)
+    }
     if (predictions.length === 0) return
     let bestIdx = 0
     let minDiff = Infinity
@@ -53,8 +58,8 @@ export default function Dashboard() {
         bestIdx = i
       }
     }
-    setPredIdx(bestIdx)
-  }
+    setPredIdx(prev => prev === bestIdx ? prev : bestIdx)
+  }, [predictions])
 
   const currentPred = predictions[predIdx] ?? null
   const predProb = currentPred?.flare_probability ?? 0
@@ -132,26 +137,29 @@ export default function Dashboard() {
         <OrbitalScrubber3D replay={replay} flares={flares} lc={lc} size={540} onScrubTime={handleScrubTime} />
 
         {/* Replay mode info */}
-        {replay && (
-          <div style={{ 
-            marginTop: '2rem', display: 'inline-flex', alignItems: 'center', gap: '0.75rem', 
-            background: 'var(--bg-elevated)', padding: '0.5rem 1rem', borderRadius: 100,
-            border: '1px solid var(--border)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
-            color: 'var(--text-secondary)'
-          }}>
-            <RefreshCw size={14} color="var(--accent)" />
-            <span className="text-accent">REPLAY MODE</span>
-            <span>·</span>
-            <span>{replay.replay_speed_x}× speed</span>
-            <span>·</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: 100, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${replay.progress_pct}%`, background: 'var(--accent)' }} />
-              </div>
-              {replay.progress_pct.toFixed(0)}%
-            </span>
-          </div>
-        )}
+        {(() => {
+          const activePct = scrubPct > 0 ? scrubPct : (replay?.progress_pct ?? 0)
+          return (
+            <div style={{ 
+              marginTop: '2rem', display: 'inline-flex', alignItems: 'center', gap: '0.75rem', 
+              background: 'var(--bg-elevated)', padding: '0.5rem 1rem', borderRadius: 100,
+              border: '1px solid var(--border)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
+              color: 'var(--text-secondary)'
+            }}>
+              <RefreshCw size={14} color="var(--accent)" />
+              <span className="text-accent">REPLAY MODE</span>
+              <span>·</span>
+              <span>{replay?.replay_speed_x ?? 1}× speed</span>
+              <span>·</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: 100, height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${activePct}%`, background: 'var(--accent)' }} />
+                </div>
+                {activePct.toFixed(0)}%
+              </span>
+            </div>
+          )
+        })()}
 
         {/* ── ML Flare Probability Gauge ── */}
         {predictions.length > 0 && (
