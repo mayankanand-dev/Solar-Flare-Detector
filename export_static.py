@@ -122,11 +122,12 @@ def _export_prediction_sample(out_path: Path):
         lc["timestamp"] = pd.to_datetime(lc["timestamp"], format="ISO8601", utc=True)
         lc = lc.sort_values("timestamp").reset_index(drop=True)
 
-        # Sample every 30 minutes through the dataset
+        # Sample every 5 minutes through the dataset (using a 30-min rolling window for feature computation)
         predictions = []
         window_size = 30 * 60  # 30 min in seconds (at 1-second cadence)
+        step_size = 5 * 60     # 5 min sampling interval for high-resolution scrubbing
 
-        for i in range(window_size, len(lc), window_size):
+        for i in range(window_size, len(lc), step_size):
             window = lc.iloc[max(0, i - window_size):i]
             flux = window["flux"].values.astype(float)
 

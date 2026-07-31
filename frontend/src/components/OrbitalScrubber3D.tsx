@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { PerspectiveCamera, Billboard, Text, Line } from '@react-three/drei'
@@ -10,6 +10,7 @@ interface ScrubberProps {
   flares: FlareEvent[]
   lc: LightcurveData | null
   size?: number
+  onScrubTime?: (timestampMs: number) => void
 }
 
 const CLASS_COLORS: Record<string, string> = {
@@ -242,7 +243,20 @@ function Scene({ isFlare, activeFlare, accentColor, reducedMotion }: any) {
   )
 }
 
-export default function OrbitalScrubber3D({ replay, flares, lc, size = 500 }: ScrubberProps) {
+function FallbackScene({ accentColor }: { accentColor: string }) {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[0, 0, 0]} intensity={50} color="#FFF9ED" />
+      <mesh>
+        <sphereGeometry args={[1.5, 32, 32]} />
+        <meshStandardMaterial color={accentColor} emissive="#331100" emissiveIntensity={0.8} />
+      </mesh>
+    </>
+  )
+}
+
+export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onScrubTime }: ScrubberProps) {
   const [isManual, setIsManual] = useState(false)
   const [manualProgressPct, setManualProgressPct] = useState(0)
   
@@ -255,6 +269,14 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500 }: Sc
       setManualProgressPct(replay.progress_pct)
     }
   }, [replay?.progress_pct, isManual])
+
+  useEffect(() => {
+    if (!lc || lc.timestamps.length === 0 || !onScrubTime) return
+    const startTimeMs = new Date(lc.time_range?.start || lc.timestamps[0]).getTime()
+    const endTimeMs = new Date(lc.time_range?.end || lc.timestamps[lc.timestamps.length - 1]).getTime()
+    const currentMs = startTimeMs + (manualProgressPct / 100) * (endTimeMs - startTimeMs)
+    onScrubTime(currentMs)
+  }, [lc, manualProgressPct, onScrubTime])
 
   const activeFlare = useMemo(() => {
     if (!lc || lc.timestamps.length === 0) return null
@@ -283,15 +305,17 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500 }: Sc
 
   return (
     <div style={{ width: '100%', maxWidth: size, margin: '0 auto', textAlign: 'center' }}>
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', background: 'transparent', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', minHeight: '300px', background: 'transparent', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 1.5, 10]} fov={45} />
-          <Scene 
-            isFlare={isFlare} 
-            activeFlare={activeFlare} 
-            accentColor={accentColor} 
-            reducedMotion={reducedMotion}
-          />
+          <Suspense fallback={<FallbackScene accentColor={accentColor} />}>
+            <Scene 
+              isFlare={isFlare} 
+              activeFlare={activeFlare} 
+              accentColor={accentColor} 
+              reducedMotion={reducedMotion}
+            />
+          </Suspense>
         </Canvas>
       </div>
 

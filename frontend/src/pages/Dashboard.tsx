@@ -34,16 +34,27 @@ export default function Dashboard() {
     })
   }, [])
 
-  // Cycle through static predictions for the demo (1 new prediction per 5s)
+  // Load offline ML predictions (sampled every 5 minutes from export_static.py)
   const [predictions, setPredictions] = useState<Array<{ timestamp: string; flare_probability: number }>>([]) 
   useEffect(() => {
     api.getPrediction().then(r => setPredictions(r.predictions || [])).catch(() => {})
   }, [])
-  useEffect(() => {
+
+  // Synchronize probability gauge directly with scrubber timeline position
+  const handleScrubTime = (tsMs: number) => {
     if (predictions.length === 0) return
-    const id = setInterval(() => setPredIdx(i => (i + 1) % predictions.length), 5000)
-    return () => clearInterval(id)
-  }, [predictions])
+    let bestIdx = 0
+    let minDiff = Infinity
+    for (let i = 0; i < predictions.length; i++) {
+      const pTime = new Date(predictions[i].timestamp).getTime()
+      const diff = Math.abs(pTime - tsMs)
+      if (diff < minDiff) {
+        minDiff = diff
+        bestIdx = i
+      }
+    }
+    setPredIdx(bestIdx)
+  }
 
   const currentPred = predictions[predIdx] ?? null
   const predProb = currentPred?.flare_probability ?? 0
@@ -118,7 +129,7 @@ export default function Dashboard() {
           </AnimatePresence>
         </div>
 
-        <OrbitalScrubber3D replay={replay} flares={flares} lc={lc} size={540} />
+        <OrbitalScrubber3D replay={replay} flares={flares} lc={lc} size={540} onScrubTime={handleScrubTime} />
 
         {/* Replay mode info */}
         {replay && (
