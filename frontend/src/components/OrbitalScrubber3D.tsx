@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef, Suspense } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas, useFrame, useLoader } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { PerspectiveCamera, Billboard, Text, Line } from '@react-three/drei'
 import { Play, Pause } from 'lucide-react'
 import type { ReplayStatus, FlareEvent, LightcurveData } from '../api'
@@ -40,7 +40,14 @@ const createGlowTexture = () => {
 }
 
 function Sun({ isFlare, accentColor, reducedMotion }: { isFlare: boolean, accentColor: string, reducedMotion: boolean }) {
-  const sunTexture = useLoader(THREE.TextureLoader, '/textures/2k_sun.jpg')
+  const [sunTexture, setSunTexture] = useState<THREE.Texture | null>(null)
+  useEffect(() => {
+    const loader = new THREE.TextureLoader()
+    loader.load('/textures/2k_sun.jpg', (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      setSunTexture(tex)
+    })
+  }, [])
   const sunRef = useRef<THREE.Mesh>(null)
   const glowTex = useMemo(() => createGlowTexture(), [])
   
@@ -87,6 +94,7 @@ function Sun({ isFlare, accentColor, reducedMotion }: { isFlare: boolean, accent
         <sphereGeometry args={[1.5, 64, 64]} />
         <meshStandardMaterial 
           map={sunTexture} 
+          color={sunTexture ? "#FFFFFF" : "#FF8C42"}
           emissive="#331100" 
           emissiveIntensity={0.5} 
         />
@@ -127,7 +135,14 @@ function Sun({ isFlare, accentColor, reducedMotion }: { isFlare: boolean, accent
 }
 
 function EarthSystem({ reducedMotion }: { reducedMotion: boolean }) {
-  const earthTexture = useLoader(THREE.TextureLoader, '/textures/2k_earth_daymap.jpg')
+  const [earthTexture, setEarthTexture] = useState<THREE.Texture | null>(null)
+  useEffect(() => {
+    const loader = new THREE.TextureLoader()
+    loader.load('/textures/2k_earth_daymap.jpg', (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      setEarthTexture(tex)
+    })
+  }, [])
   const groupRef = useRef<THREE.Group>(null)
   const earthRef = useRef<THREE.Mesh>(null)
 
@@ -169,7 +184,7 @@ function EarthSystem({ reducedMotion }: { reducedMotion: boolean }) {
         {/* Earth */}
         <mesh ref={earthRef} position={[6, 0, 0]}>
           <sphereGeometry args={[0.3, 32, 32]} />
-          <meshStandardMaterial map={earthTexture} roughness={0.7} />
+          <meshStandardMaterial map={earthTexture} color={earthTexture ? "#FFFFFF" : "#4A90D9"} roughness={0.7} />
         </mesh>
 
         {/* Aditya-L1 Point (between Earth and Sun) */}
@@ -243,19 +258,6 @@ function Scene({ isFlare, activeFlare, accentColor, reducedMotion }: any) {
   )
 }
 
-function FallbackScene({ accentColor }: { accentColor: string }) {
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[0, 0, 0]} intensity={50} color="#FFF9ED" />
-      <mesh>
-        <sphereGeometry args={[1.5, 32, 32]} />
-        <meshStandardMaterial color={accentColor} emissive="#331100" emissiveIntensity={0.8} />
-      </mesh>
-    </>
-  )
-}
-
 export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onScrubTime }: ScrubberProps) {
   const [isManual, setIsManual] = useState(false)
   const [manualProgressPct, setManualProgressPct] = useState(0)
@@ -308,14 +310,12 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onSc
       <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', minHeight: '300px', background: 'transparent', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 1.5, 10]} fov={45} />
-          <Suspense fallback={<FallbackScene accentColor={accentColor} />}>
-            <Scene 
-              isFlare={isFlare} 
-              activeFlare={activeFlare} 
-              accentColor={accentColor} 
-              reducedMotion={reducedMotion}
-            />
-          </Suspense>
+          <Scene 
+            isFlare={isFlare} 
+            activeFlare={activeFlare} 
+            accentColor={accentColor} 
+            reducedMotion={reducedMotion}
+          />
         </Canvas>
       </div>
 
