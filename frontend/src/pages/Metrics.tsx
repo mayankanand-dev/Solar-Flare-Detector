@@ -262,7 +262,7 @@ export default function Metrics() {
                   <YAxis type="category" dataKey="name" stroke="var(--text-muted)" fontSize={10} tickLine={false} width={80} />
                   <RechartsTooltip
                     contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 4, fontSize: '0.85rem' }}
-                    formatter={(v: number) => [`${v}%`, 'Importance']}
+                    formatter={(v: any) => [`${v}%`, 'Importance']}
                   />
                   <Bar dataKey="importance" radius={[0, 4, 4, 0]}>
                     {featureImportances.map((_, index) => (
