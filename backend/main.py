@@ -34,8 +34,12 @@ log = logging.getLogger(__name__)
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent.parent
-LIGHTCURVE_CSV = BASE_DIR / "data/processed/lightcurve.csv"
-FLARES_JSON = BASE_DIR / "data/processed/flares.json"
+LIGHTCURVE_CSV     = BASE_DIR / "data/processed/lightcurve.csv"
+FLARES_JSON        = BASE_DIR / "data/processed/flares.json"
+MODEL_METRICS_JSON = BASE_DIR / "data/processed/model_metrics.json"
+VALIDATION_JSON    = BASE_DIR / "data/processed/validation_report.json"
+MODEL_JOBLIB       = BASE_DIR / "data/processed/model.joblib"
+MANIFEST_JSON      = BASE_DIR / "data/processed/.manifest.json"
 
 # ─── Replay config ────────────────────────────────────────────────────────────
 # 1 real day compressed into N minutes of replay
@@ -46,6 +50,8 @@ REPLAY_SPEED = float(os.getenv("REPLAY_SPEED", ""))  if os.getenv("REPLAY_SPEED"
 _lightcurve: Optional[pd.DataFrame] = None
 _flares: Optional[list[dict]] = None
 _flares_meta: Optional[dict] = None
+_model_pipeline = None       # loaded lazily
+_model_metrics: Optional[dict] = None
 _replay_state: dict = {
     "current_idx": 0,
     "current_time": None,
@@ -91,7 +97,8 @@ def load_lightcurve() -> pd.DataFrame:
             ),
         )
     log.info(f"Loading lightcurve from {LIGHTCURVE_CSV}...")
-    df = pd.read_csv(LIGHTCURVE_CSV, parse_dates=["timestamp"])
+    df = pd.read_csv(LIGHTCURVE_CSV)
+    df["timestamp"] = pd.to_datetime(df["timestamp"], format="ISO8601", utc=True)
     df = df.sort_values("timestamp").reset_index(drop=True)
     log.info(f"Loaded {len(df):,} rows, range: {df['timestamp'].min()} → {df['timestamp'].max()}")
     _lightcurve = df
@@ -114,6 +121,56 @@ def load_flares() -> tuple[list[dict], dict]:
     _flares_meta = {k: v for k, v in data.items() if k != "flares"}
     log.info(f"Loaded {len(_flares)} flares from {FLARES_JSON}")
     return _flares, _flares_meta
+
+
+def load_model_metrics() -> dict:
+    """Load real ML metrics from model_metrics.json."""
+    global _model_metrics
+    if _model_metrics is not None:
+        return _model_metrics
+    if MODEL_METRICS_JSON.exists():
+        with open(MODEL_METRICS_JSON) as f:
+            _model_metrics = json.load(f)
+        log.info(f"Loaded model metrics from {MODEL_METRICS_JSON}")
+        return _model_metrics
+    # Fallback: minimal stub so the frontend doesn't crash before first training
+    log.warning("model_metrics.json not found — returning stub. Run: python pipeline/retrain.py")
+    import math
+    curves = []
+    for e in range(1, 51):
+        curves.append({
+            "epoch": e,
+            "loss":     round(0.9 * math.exp(-0.06 * e) + 0.05, 4),
+            "val_loss": round(1.0 * math.exp(-0.05 * e) + 0.08, 4),
+            "accuracy": round(0.98 - 0.4 * math.exp(-0.08 * e), 4),
+            "val_accuracy": round(0.95 - 0.4 * math.exp(-0.08 * e), 4),
+        })
+    return {
+        "training_curves": curves,
+        "weightage": [
+            {"name": "HEL1OS (12-200 keV)", "value": 50},
+            {"name": "SoLEXS (1-15 keV)",   "value": 50},
+        ],
+        "confusion_matrix": {"TP": 0, "FP": 0, "TN": 0, "FN": 0},
+        "precision": 0.0, "recall": 0.0, "f1_score": 0.0,
+        "feature_importances": {},
+        "note": "STUB — run python pipeline/retrain.py to generate real metrics",
+    }
+
+
+def load_prediction_model():
+    """Lazily load the trained XGBoost model pipeline."""
+    global _model_pipeline
+    if _model_pipeline is not None:
+        return _model_pipeline
+    if MODEL_JOBLIB.exists():
+        try:
+            import joblib
+            _model_pipeline = joblib.load(MODEL_JOBLIB)
+            log.info(f"Loaded prediction model from {MODEL_JOBLIB}")
+        except Exception as e:
+            log.warning(f"Could not load model: {e}")
+    return _model_pipeline
 
 
 # ─── Replay Logic ─────────────────────────────────────────────────────────────
@@ -382,27 +439,134 @@ def get_stats():
 
 @app.get("/api/metrics")
 def get_metrics():
-    """Return model training metrics and dataset weightage (Simulated for UI)."""
-    import math
-    curves = []
-    for e in range(1, 101):
-        curves.append({
-            "epoch": e,
-            "loss": round(0.9 * math.exp(-0.05 * e) + 0.05 + 0.02 * math.sin(e), 4),
-            "val_loss": round(1.0 * math.exp(-0.045 * e) + 0.08 + 0.03 * math.cos(e), 4),
-            "accuracy": round(0.98 - 0.4 * math.exp(-0.08 * e) + 0.005 * math.sin(e*2), 4)
-        })
-    
-    return {
-        "training_curves": curves,
-        "weightage": [
-            {"name": "HEL1OS (12-200 keV)", "value": 50},
-            {"name": "SoLEXS (1-15 keV)", "value": 50}
-        ],
-        "confusion_matrix": {
-            "TP": 142,
-            "FP": 12,
-            "TN": 1054,
-            "FN": 4
+    """Return real ML model training metrics from model_metrics.json."""
+    return load_model_metrics()
+
+
+@app.get("/api/validation")
+def get_validation():
+    """Return the real NOAA cross-validation report."""
+    if not VALIDATION_JSON.exists():
+        return {
+            "note": "Validation report not found. Run: python pipeline/validate.py",
+            "detected": 0, "noaa_events": 0,
+            "true_positives": 0, "false_positives": 0, "false_negatives": 0,
+            "precision": 0.0, "recall": 0.0, "f1_score": 0.0,
         }
+    with open(VALIDATION_JSON) as f:
+        return json.load(f)
+
+
+@app.get("/api/prediction")
+def get_prediction(
+    minutes: int = Query(30, ge=5, le=120, description="Look-back window in minutes"),
+):
+    """
+    Run the trained XGBoost model on the current replay position
+    to predict flare probability in the next 30 minutes.
+    """
+    model = load_prediction_model()
+    metrics = load_model_metrics()
+    feature_cols = metrics.get("feature_cols", [])
+
+    if model is None or not feature_cols:
+        return {
+            "flare_probability": 0.0,
+            "predicted_class": "unknown",
+            "confidence": "none",
+            "note": "Model not trained yet. Run: python pipeline/retrain.py",
+        }
+
+    try:
+        df = load_lightcurve()
+        current_idx = _replay_state.get("current_idx", 0)
+        # Get `minutes` worth of data before current replay position
+        start_idx = max(0, current_idx - minutes * 60)
+        window_df = df.iloc[start_idx:current_idx + 1]
+
+        if len(window_df) < 5:
+            return {"flare_probability": 0.0, "predicted_class": "quiet", "confidence": "low",
+                    "note": "Not enough data in window"}
+
+        flux = window_df["flux"].values.astype(float)
+        window_15 = flux[-15*60:] if len(flux) >= 15*60 else flux
+        window_90 = flux[-90*60:] if len(flux) >= 90*60 else flux
+
+        import numpy as np
+        med_90 = float(np.median(window_90)) if len(window_90) > 0 else float(flux[-1])
+        std_90 = float(np.std(window_90)) + 1e-6
+
+        val_curr = float(flux[-1])
+        val_5m   = float(flux[-min(len(flux), 300)])
+        val_15m  = float(flux[-min(len(flux), 900)])
+
+        s_flux = window_df["solexs_flux"].values.astype(float) if "solexs_flux" in window_df.columns else flux
+        h_flux = window_df["hel1os_flux"].values.astype(float) if "hel1os_flux" in window_df.columns else flux
+
+        val_curr_s, val_5m_s, val_15m_s, val_30m_s = s_flux[-1], s_flux[-min(len(s_flux), 300)], s_flux[-min(len(s_flux), 900)], s_flux[-min(len(s_flux), 1800)]
+        val_curr_h, val_5m_h = h_flux[-1], h_flux[-min(len(h_flux), 300)]
+        med_90_s, std_90_s = float(np.median(s_flux)), float(np.std(s_flux)) + 1e-6
+        med_90_h, std_90_h = float(np.median(h_flux)), float(np.std(h_flux)) + 1e-6
+
+        row = {
+            "solexs_zscore":  (val_curr_s - med_90_s) / std_90_s,
+            "solexs_norm":    (val_curr_s - med_90_s) / (abs(med_90_s) + 1e-6),
+            "solexs_roc_5m":  (val_curr_s - val_5m_s) / (abs(val_5m_s) + 1e-6),
+            "solexs_roc_15m": (val_curr_s - val_15m_s) / (abs(val_15m_s) + 1e-6),
+            "solexs_roc_30m": (val_curr_s - val_30m_s) / (abs(val_30m_s) + 1e-6),
+            "solexs_acc_15m": ((val_curr_s - val_15m_s) / (abs(val_15m_s) + 1e-6)) - ((val_5m_s - val_15m_s) / (abs(val_15m_s) + 1e-6)),
+            "hel1os_zscore":  (val_curr_h - med_90_h) / std_90_h,
+            "hel1os_roc_5m":  (val_curr_h - val_5m_h) / (abs(val_5m_h) + 1e-6),
+            "flux_zscore":    (val_curr - med_90) / std_90,
+            "std_ratio_15m":  float(np.std(window_15)) / std_90,
+            "max_ratio_15m":  (float(np.max(window_15)) - med_90) / std_90,
+            "h_s_ratio":      float(val_curr_h / (val_curr_s + 1e-6)),
+            "h_s_ratio_roc":  0.0,
+        }
+
+        X = np.array([[row.get(c, 0.0) for c in feature_cols]])
+        prob = float(model.predict_proba(X)[0][1])
+
+        if prob >= 0.7:
+            pred_class, confidence = "M-X class likely", "high"
+        elif prob >= 0.4:
+            pred_class, confidence = "B-C class possible", "medium"
+        else:
+            pred_class, confidence = "quiet", "low"
+
+        return {
+            "flare_probability": round(prob, 3),
+            "predicted_class":   pred_class,
+            "confidence":        confidence,
+            "horizon_minutes":   30,
+        }
+    except Exception as e:
+        log.warning(f"Prediction error: {e}")
+        return {"flare_probability": 0.0, "predicted_class": "error", "confidence": "none", "error": str(e)}
+
+
+@app.get("/api/pipeline/status")
+def get_pipeline_status():
+    """Return data pipeline status — useful for the UI to show if data is stale."""
+    manifest = None
+    if MANIFEST_JSON.exists():
+        with open(MANIFEST_JSON) as f:
+            manifest = json.load(f)
+
+    metrics = None
+    trained_at = None
+    if MODEL_METRICS_JSON.exists():
+        with open(MODEL_METRICS_JSON) as f:
+            metrics = json.load(f)
+        trained_at = metrics.get("trained_at")
+
+    return {
+        "model_exists":    MODEL_JOBLIB.exists(),
+        "metrics_exist":   MODEL_METRICS_JSON.exists(),
+        "last_trained_at": trained_at,
+        "fits_file_count": manifest.get("file_count", 0) if manifest else 0,
+        "hel1os_count":    manifest.get("hel1os_count", 0) if manifest else 0,
+        "solexs_count":    manifest.get("solexs_count", 0) if manifest else 0,
+        "manifest_updated_at": manifest.get("computed_at") if manifest else None,
+        "retrain_command": "python pipeline/retrain.py",
     }

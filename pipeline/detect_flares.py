@@ -165,7 +165,7 @@ def detect_flares(
         return []
 
     df = df.copy()
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], format="ISO8601", utc=True)
     df = df.sort_values("timestamp").reset_index(drop=True)
 
     # Step 1: Compute baseline

@@ -47,6 +47,15 @@ def fetch_noaa_events(start_date: str, end_date: str) -> pd.DataFrame:
     local_cache = Path("data/processed/noaa_events_cache.json")
 
     # Try live fetch
+    # Prefer local cache first (offline operation & historical dates)
+    if local_cache.exists():
+        log.info(f"Using cached NOAA events: {local_cache}")
+        with open(local_cache) as f:
+            data = json.load(f)
+        df = _parse_noaa_json(data, start_date, end_date)
+        if not df.empty:
+            return df
+
     try:
         import requests
         log.info(f"Fetching NOAA GOES events from {NOAA_EVENTS_URL}")
@@ -62,13 +71,6 @@ def fetch_noaa_events(start_date: str, end_date: str) -> pd.DataFrame:
             log.warning(f"  NOAA API returned {resp.status_code}")
     except Exception as e:
         log.warning(f"  Live NOAA fetch failed: {e}")
-
-    # Fall back to local cache
-    if local_cache.exists():
-        log.info(f"Using cached NOAA events: {local_cache}")
-        with open(local_cache) as f:
-            data = json.load(f)
-        return _parse_noaa_json(data, start_date, end_date)
 
     # No data available
     log.warning(
@@ -213,6 +215,14 @@ def validate_detections(
 
 def write_report(results: dict, output_path: Path):
     """Write a human-readable validation report."""
+    prec_val = results.get("precision")
+    rec_val  = results.get("recall")
+    f1_val   = results.get("f1_score")
+
+    prec_str = f"{prec_val:.3f}" if isinstance(prec_val, (int, float)) else "N/A"
+    rec_str  = f"{rec_val:.3f}"  if isinstance(rec_val,  (int, float)) else "N/A"
+    f1_str   = f"{f1_val:.3f}"   if isinstance(f1_val,   (int, float)) else "N/A"
+
     lines = [
         "=" * 70,
         "SOLAR SENTINEL — VALIDATION REPORT",
@@ -225,9 +235,9 @@ def write_report(results: dict, output_path: Path):
         f"True Positives:    {results.get('true_positives', 'N/A')}",
         f"False Positives:   {results.get('false_positives', 'N/A')}",
         f"False Negatives:   {results.get('false_negatives', 'N/A')}",
-        f"Precision:         {results.get('precision', 'N/A'):.3f}",
-        f"Recall:            {results.get('recall', 'N/A'):.3f}",
-        f"F1 Score:          {results.get('f1_score', 'N/A'):.3f}",
+        f"Precision:         {prec_str}",
+        f"Recall:            {rec_str}",
+        f"F1 Score:          {f1_str}",
         "",
         f"Note: {results.get('note', '')}",
         "",

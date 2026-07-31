@@ -1,60 +1,58 @@
 ======================================================================
 SOLAR SENTINEL — VALIDATION REPORT
-Generated: 2026-07-11T19:31:23.621490+00:00
+Generated: 2026-07-31T14:05:38.424818+00:00
 Data: Real Aditya-L1 HEL1OS data (ISRO PRADAN)
 ======================================================================
 
-Our detections:    151
+Our detections:    146
 NOAA events:       44
-True Positives:    37
-False Positives:   114
+True Positives:    35
+False Positives:   111
 False Negatives:   37
-Precision:         0.245
-Recall:            0.500
-F1 Score:          0.329
+Precision:         0.240
+Recall:            0.486
+F1 Score:          0.321
 
 Note: Results are approximate — HEL1OS energy band differs from GOES. Timing differences may reflect propagation, instrument sensitivity, or threshold tuning.
 
 
 Matched Flares (True Positives):
 --------------------------------------------------
-  Flare #91 (ours: C, NOAA: ) at 2026-07-05T03:07 — Δt=9.0min
-  Flare #92 (ours: C, NOAA: ) at 2026-07-05T03:08 — Δt=7.7min
-  Flare #93 (ours: C, NOAA: ) at 2026-07-05T03:10 — Δt=5.1min
-  Flare #94 (ours: C, NOAA: ) at 2026-07-05T03:12 — Δt=3.7min
-  Flare #105 (ours: C, NOAA: ) at 2026-07-05T05:28 — Δt=7.5min
-  Flare #114 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.1min
-  Flare #115 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.2min
-  Flare #116 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.3min
-  Flare #117 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.4min
-  Flare #118 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.5min
-  Flare #119 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.6min
-  Flare #120 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.8min
-  Flare #121 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.9min
-  Flare #122 (ours: B, NOAA: ) at 2026-07-05T16:28 — Δt=8.0min
-  Flare #123 (ours: C, NOAA: ) at 2026-07-05T16:29 — Δt=8.7min
-  Flare #124 (ours: C, NOAA: ) at 2026-07-05T16:29 — Δt=8.7min
-  Flare #125 (ours: M, NOAA: ) at 2026-07-05T17:55 — Δt=4.3min
-  Flare #126 (ours: C, NOAA: ) at 2026-07-05T17:56 — Δt=5.8min
-  Flare #127 (ours: C, NOAA: ) at 2026-07-05T17:57 — Δt=6.1min
-  Flare #128 (ours: B, NOAA: ) at 2026-07-05T17:57 — Δt=6.3min
-  Flare #129 (ours: C, NOAA: ) at 2026-07-05T21:18 — Δt=4.2min
-  Flare #130 (ours: M, NOAA: ) at 2026-07-05T21:18 — Δt=4.3min
-  Flare #131 (ours: M, NOAA: ) at 2026-07-05T21:18 — Δt=4.3min
-  Flare #132 (ours: M, NOAA: ) at 2026-07-05T21:19 — Δt=5.1min
-  Flare #133 (ours: B, NOAA: ) at 2026-07-05T21:19 — Δt=5.7min
-  Flare #134 (ours: B, NOAA: ) at 2026-07-05T21:19 — Δt=5.8min
-  Flare #135 (ours: B, NOAA: ) at 2026-07-07T14:16 — Δt=7.7min
-  Flare #136 (ours: C, NOAA: ) at 2026-07-07T14:16 — Δt=7.8min
-  Flare #137 (ours: C, NOAA: ) at 2026-07-07T14:16 — Δt=7.9min
-  Flare #138 (ours: C, NOAA: ) at 2026-07-07T14:17 — Δt=8.9min
-  Flare #139 (ours: M, NOAA: ) at 2026-07-07T14:18 — Δt=9.1min
-  Flare #140 (ours: M, NOAA: ) at 2026-07-07T14:18 — Δt=9.3min
-  Flare #141 (ours: M, NOAA: ) at 2026-07-07T14:18 — Δt=9.6min
-  Flare #143 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.3min
-  Flare #144 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.4min
-  Flare #145 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.6min
-  Flare #146 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.7min
+  Flare #89 (ours: C, NOAA: ) at 2026-07-05T03:07 — Δt=9.0min
+  Flare #90 (ours: C, NOAA: ) at 2026-07-05T03:08 — Δt=7.7min
+  Flare #91 (ours: C, NOAA: ) at 2026-07-05T03:10 — Δt=5.1min
+  Flare #92 (ours: C, NOAA: ) at 2026-07-05T03:12 — Δt=3.7min
+  Flare #101 (ours: C, NOAA: ) at 2026-07-05T05:28 — Δt=7.5min
+  Flare #111 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.1min
+  Flare #112 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.2min
+  Flare #113 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.3min
+  Flare #114 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.4min
+  Flare #115 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.5min
+  Flare #116 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.6min
+  Flare #117 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.8min
+  Flare #118 (ours: C, NOAA: ) at 2026-07-05T16:28 — Δt=7.8min
+  Flare #119 (ours: B, NOAA: ) at 2026-07-05T16:28 — Δt=8.0min
+  Flare #120 (ours: C, NOAA: ) at 2026-07-05T16:29 — Δt=8.7min
+  Flare #121 (ours: C, NOAA: ) at 2026-07-05T16:29 — Δt=8.7min
+  Flare #122 (ours: M, NOAA: ) at 2026-07-05T17:55 — Δt=4.3min
+  Flare #123 (ours: B, NOAA: ) at 2026-07-05T17:57 — Δt=6.5min
+  Flare #124 (ours: B, NOAA: ) at 2026-07-05T17:57 — Δt=6.7min
+  Flare #125 (ours: C, NOAA: ) at 2026-07-05T21:18 — Δt=4.2min
+  Flare #126 (ours: M, NOAA: ) at 2026-07-05T21:18 — Δt=4.2min
+  Flare #127 (ours: M, NOAA: ) at 2026-07-05T21:18 — Δt=4.3min
+  Flare #128 (ours: M, NOAA: ) at 2026-07-05T21:19 — Δt=5.0min
+  Flare #129 (ours: B, NOAA: ) at 2026-07-05T21:19 — Δt=5.7min
+  Flare #130 (ours: B, NOAA: ) at 2026-07-05T21:19 — Δt=5.8min
+  Flare #133 (ours: B, NOAA: ) at 2026-07-07T14:16 — Δt=7.7min
+  Flare #134 (ours: B, NOAA: ) at 2026-07-07T14:16 — Δt=7.8min
+  Flare #135 (ours: C, NOAA: ) at 2026-07-07T14:16 — Δt=7.9min
+  Flare #136 (ours: C, NOAA: ) at 2026-07-07T14:17 — Δt=8.9min
+  Flare #137 (ours: M, NOAA: ) at 2026-07-07T14:18 — Δt=9.1min
+  Flare #138 (ours: M, NOAA: ) at 2026-07-07T14:18 — Δt=9.2min
+  Flare #142 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.3min
+  Flare #143 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.4min
+  Flare #144 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.6min
+  Flare #145 (ours: C, NOAA: ) at 2026-07-08T17:53 — Δt=4.7min
 
 NOAA Events We Missed (False Negatives):
 --------------------------------------------------
@@ -93,13 +91,13 @@ Our Detections Not in NOAA (False Positives):
   Flare #10 (M) at 2026-07-02T10:25
   Flare #11 (X) at 2026-07-02T10:25
   Flare #12 (C) at 2026-07-02T10:26
-  Flare #13 (C) at 2026-07-02T23:11
-  Flare #14 (M) at 2026-07-02T23:11
+  Flare #13 (B) at 2026-07-02T10:26
+  Flare #14 (M) at 2026-07-02T11:59
   Flare #15 (C) at 2026-07-02T23:11
-  Flare #16 (M) at 2026-07-03T12:10
-  Flare #17 (M) at 2026-07-03T12:11
-  Flare #18 (C) at 2026-07-03T12:11
-  Flare #19 (M) at 2026-07-03T12:11
-  Flare #20 (C) at 2026-07-03T12:11
+  Flare #16 (M) at 2026-07-02T23:11
+  Flare #17 (C) at 2026-07-02T23:11
+  Flare #18 (M) at 2026-07-02T23:59
+  Flare #19 (M) at 2026-07-03T12:10
+  Flare #20 (M) at 2026-07-03T12:11
 
 ======================================================================

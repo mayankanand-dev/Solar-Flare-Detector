@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, RefreshCw, AlertTriangle } from 'lucide-react'
+import { Zap, RefreshCw, AlertTriangle, Activity } from 'lucide-react'
 import { api, type ReplayStatus, type FlareEvent, type LightcurveData } from '../api'
 import OrbitalScrubber3D from '../components/OrbitalScrubber3D'
 import './Dashboard.css'
@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [lc, setLc] = useState<LightcurveData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [predIdx, setPredIdx] = useState(0)  // cycles through static predictions
 
   // Load static data once
   useEffect(() => {
@@ -32,6 +33,20 @@ export default function Dashboard() {
       setLoading(false)
     })
   }, [])
+
+  // Cycle through static predictions for the demo (1 new prediction per 5s)
+  const [predictions, setPredictions] = useState<Array<{ timestamp: string; flare_probability: number }>>([]) 
+  useEffect(() => {
+    api.getPrediction().then(r => setPredictions(r.predictions || [])).catch(() => {})
+  }, [])
+  useEffect(() => {
+    if (predictions.length === 0) return
+    const id = setInterval(() => setPredIdx(i => (i + 1) % predictions.length), 5000)
+    return () => clearInterval(id)
+  }, [predictions])
+
+  const currentPred = predictions[predIdx] ?? null
+  const predProb = currentPred?.flare_probability ?? 0
 
   // Poll replay status every 1s
   useEffect(() => {
@@ -124,6 +139,61 @@ export default function Dashboard() {
               </div>
               {replay.progress_pct.toFixed(0)}%
             </span>
+          </div>
+        )}
+
+        {/* ── ML Flare Probability Gauge ── */}
+        {predictions.length > 0 && (
+          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <div style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14,
+              padding: '1.25rem 2rem', minWidth: 320, maxWidth: 480
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <Activity size={14} color="var(--accent)" />
+                  Flare Probability (next 30 min)
+                </div>
+                <div style={{
+                  fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.6rem', borderRadius: 100,
+                  background: predProb >= 0.7 ? 'rgba(216,72,30,0.15)' : predProb >= 0.4 ? 'rgba(244,162,97,0.15)' : 'rgba(42,157,143,0.15)',
+                  color: predProb >= 0.7 ? '#D8481E' : predProb >= 0.4 ? '#F4A261' : '#2A9D8F',
+                  border: `1px solid ${predProb >= 0.7 ? '#D8481E' : predProb >= 0.4 ? '#F4A261' : '#2A9D8F'}`,
+                }}>
+                  {predProb >= 0.7 ? '⚠ HIGH RISK' : predProb >= 0.4 ? '◐ MODERATE' : '✓ LOW RISK'}
+                </div>
+              </div>
+
+              {/* Gauge bar */}
+              <div style={{ position: 'relative', height: 10, background: 'var(--border)', borderRadius: 10, overflow: 'hidden', marginBottom: '0.5rem' }}>
+                <motion.div
+                  animate={{ width: `${predProb * 100}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  style={{
+                    height: '100%', borderRadius: 10,
+                    background: predProb >= 0.7
+                      ? 'linear-gradient(90deg, #F4A261, #D8481E)'
+                      : predProb >= 0.4
+                      ? 'linear-gradient(90deg, #2A9D8F, #F4A261)'
+                      : 'linear-gradient(90deg, #2A9D8F, #4A90D9)',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  {currentPred?.timestamp ? new Date(currentPred.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'} UTC
+                </span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 800, fontFamily: 'var(--font-mono)',
+                  color: predProb >= 0.7 ? '#D8481E' : predProb >= 0.4 ? '#F4A261' : '#2A9D8F'
+                }}>
+                  {(predProb * 100).toFixed(0)}%
+                </span>
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.4rem', textAlign: 'right' }}>
+                XGBoost · Aditya-L1 HEL1OS+SoLEXS · NOAA-validated
+              </div>
+            </div>
           </div>
         )}
       </div>

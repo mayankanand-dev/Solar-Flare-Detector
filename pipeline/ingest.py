@@ -178,7 +178,12 @@ def ingest_directory(
 ) -> pd.DataFrame:
     """
     Reads all FITS files in input_dir (recursively), parses them, and
-    returns a 50-50 fused time-sorted DataFrame with columns [timestamp, flux, source].
+    returns a time-sorted DataFrame with columns [timestamp, flux, source].
+
+    Fusion strategy:
+    - Fuse HEL1OS + SoLEXS on their overlapping date range (50-50 blend)
+    - Outside the overlap, use whichever instrument has data (labeled clearly)
+    - Saves per-instrument CSVs to data/processed/ for ML feature engineering
     """
     fits_files = sorted(input_dir.rglob("*.fits"))
 
@@ -224,6 +229,7 @@ def ingest_directory(
             log.warning(f"HEL1OS failed {f.name}: {e}")
     if frames:
         df_hel1os = pd.concat(frames, ignore_index=True).sort_values("timestamp").drop_duplicates("timestamp")
+        df_hel1os["timestamp"] = pd.to_datetime(df_hel1os["timestamp"], utc=True)
         
     # Read SoLEXS
     frames = []
@@ -235,45 +241,122 @@ def ingest_directory(
             log.warning(f"SoLEXS failed {f.name}: {e}")
     if frames:
         df_solexs = pd.concat(frames, ignore_index=True).sort_values("timestamp").drop_duplicates("timestamp")
+        df_solexs["timestamp"] = pd.to_datetime(df_solexs["timestamp"], utc=True)
 
     if df_hel1os.empty and df_solexs.empty:
         raise RuntimeError("No files parsed.")
-        
-    log.info(f"Fusing {len(df_hel1os)} HEL1OS rows and {len(df_solexs)} SoLEXS rows...")
-        
-    # FUSION
-    if not df_hel1os.empty and not df_solexs.empty:
-        # Normalize both to 0-1
-        df_hel1os["flux_norm"] = (df_hel1os["flux"] - df_hel1os["flux"].min()) / (df_hel1os["flux"].max() - df_hel1os["flux"].min())
-        df_solexs["flux_norm"] = (df_solexs["flux"] - df_solexs["flux"].min()) / (df_solexs["flux"].max() - df_solexs["flux"].min())
-        
-        # Resample
-        df_hel1os.set_index("timestamp", inplace=True)
-        df_solexs.set_index("timestamp", inplace=True)
-        
-        h_res = df_hel1os.resample("1s").mean().interpolate(method="time", limit=60)
-        s_res = df_solexs.resample("1s").mean().interpolate(method="time", limit=60)
-        
-        # Combine
-        combined = pd.DataFrame(index=h_res.index.union(s_res.index))
-        combined["h"] = h_res["flux_norm"]
-        combined["s"] = s_res["flux_norm"]
-        
-        combined["h"] = combined["h"].interpolate(method="time", limit=60)
-        combined["s"] = combined["s"].interpolate(method="time", limit=60)
-        
-        # Exactly 50-50
-        combined["flux"] = combined[["h", "s"]].mean(axis=1) * 1000 # Scale up for readability
-        combined = combined.dropna(subset=["flux"]).reset_index()
-        combined = combined.rename(columns={"index": "timestamp"})
-        combined["source"] = "Ensemble Fusion (50% HEL1OS, 50% SoLEXS)"
-        return combined
-    elif not df_hel1os.empty:
-        df_hel1os["source"] = "HEL1OS Only (Fusion Failed)"
-        return df_hel1os
+
+    # ── Save per-instrument CSVs for ML feature engineering ──────────────────
+    processed_dir = input_dir.parent.parent / "data" / "processed"
+    processed_dir.mkdir(parents=True, exist_ok=True)
+
+    if not df_hel1os.empty:
+        h_out = processed_dir / "hel1os_lightcurve.csv"
+        df_hel1os[["timestamp", "flux"]].to_csv(h_out, index=False)
+        log.info(f"  ✓ Saved HEL1OS lightcurve: {len(df_hel1os):,} rows → {h_out}")
+
+    if not df_solexs.empty:
+        s_out = processed_dir / "solexs_lightcurve.csv"
+        df_solexs[["timestamp", "flux"]].to_csv(s_out, index=False)
+        log.info(f"  ✓ Saved SoLEXS lightcurve: {len(df_solexs):,} rows → {s_out}")
+
+    # ── Sensor Fusion ─────────────────────────────────────────────────────────
+    if df_hel1os.empty:
+        log.warning("No HEL1OS data — using SoLEXS only")
+        df_solexs["source"] = "SoLEXS Only (HEL1OS unavailable)"
+        return df_solexs[["timestamp", "flux", "source"]]
+
+    if df_solexs.empty:
+        log.warning("No SoLEXS data — using HEL1OS only")
+        df_hel1os["source"] = "HEL1OS Only (SoLEXS unavailable)"
+        return df_hel1os[["timestamp", "flux", "source"]]
+
+    # Find the overlapping date range
+    h_start = df_hel1os["timestamp"].min()
+    h_end   = df_hel1os["timestamp"].max()
+    s_start = df_solexs["timestamp"].min()
+    s_end   = df_solexs["timestamp"].max()
+
+    overlap_start = max(h_start, s_start)
+    overlap_end   = min(h_end, s_end)
+
+    log.info(f"HEL1OS range:  {h_start.date()} → {h_end.date()} ({len(df_hel1os):,} rows)")
+    log.info(f"SoLEXS range:  {s_start.date()} → {s_end.date()} ({len(df_solexs):,} rows)")
+
+    if overlap_start >= overlap_end:
+        log.warning("⚠ HEL1OS and SoLEXS have no overlapping dates — using HEL1OS only")
+        df_hel1os["hel1os_flux"] = df_hel1os["flux"]
+        df_hel1os["solexs_flux"] = df_hel1os["flux"]
+        df_hel1os["source"] = "HEL1OS Only (No SoLEXS overlap)"
+        return df_hel1os[["timestamp", "flux", "hel1os_flux", "solexs_flux", "source"]]
+
+    log.info(f"Overlap window: {overlap_start.date()} → {overlap_end.date()}")
+
+    # Slice each instrument to the overlap window
+    h_overlap = df_hel1os[
+        (df_hel1os["timestamp"] >= overlap_start) & (df_hel1os["timestamp"] <= overlap_end)
+    ].copy()
+    s_overlap = df_solexs[
+        (df_solexs["timestamp"] >= overlap_start) & (df_solexs["timestamp"] <= overlap_end)
+    ].copy()
+
+    log.info(f"Fusing {len(h_overlap):,} HEL1OS rows and {len(s_overlap):,} SoLEXS rows on overlap window...")
+
+    # Normalize both to [0, 1] range
+    def norm(series):
+        mn, mx = series.min(), series.max()
+        if mx - mn < 1e-10:
+            return series * 0.0
+        return (series - mn) / (mx - mn)
+
+    h_overlap["flux_norm"] = norm(h_overlap["flux"])
+    s_overlap["flux_norm"] = norm(s_overlap["flux"])
+
+    # Resample both to 1-second grid then fuse
+    h_overlap = h_overlap.set_index("timestamp")
+    s_overlap = s_overlap.set_index("timestamp")
+
+    h_res = h_overlap["flux_norm"].resample("1s").mean().interpolate(method="time", limit=120)
+    s_res = s_overlap["flux_norm"].resample("1s").mean().interpolate(method="time", limit=120)
+
+    # Union index — only keep timestamps where BOTH sensors have data
+    common_idx = h_res.dropna().index.intersection(s_res.dropna().index)
+    if len(common_idx) == 0:
+        log.warning("⚠ No common timestamps after resampling — using HEL1OS only for overlap window")
+        fused = h_overlap[["flux_norm"]].rename(columns={"flux_norm": "flux"})
+        fused["flux"] = fused["flux"] * 1000
+        fused["hel1os_flux"] = fused["flux"]
+        fused["solexs_flux"] = fused["flux"]
+        fused["source"] = "HEL1OS Only (SoLEXS resample failed)"
+        fused = fused.reset_index()[["timestamp", "flux", "hel1os_flux", "solexs_flux", "source"]]
     else:
-        df_solexs["source"] = "SoLEXS Only (Fusion Failed)"
-        return df_solexs
+        fused = pd.DataFrame({
+            "timestamp": common_idx,
+            "flux": ((h_res[common_idx] + s_res[common_idx]) / 2.0 * 1000).values,
+            "hel1os_flux": (h_res[common_idx] * 1000).values,
+            "solexs_flux": (s_res[common_idx] * 1000).values,
+            "source": "Ensemble Fusion (50% HEL1OS, 50% SoLEXS)"
+        })
+    log.info(f"  ✓ Fused window: {len(fused):,} rows")
+
+    # HEL1OS data OUTSIDE the overlap window (e.g. Jul 10 if SoLEXS ends Jul 9)
+    h_outside = df_hel1os[
+        (df_hel1os["timestamp"] < overlap_start) | (df_hel1os["timestamp"] > overlap_end)
+    ].copy()
+
+    parts = [fused]
+    if not h_outside.empty:
+        # Normalize HEL1OS-only data to same scale as fused (0–1000 range)
+        h_outside["flux"] = norm(h_outside["flux"]) * 1000
+        h_outside["hel1os_flux"] = h_outside["flux"]
+        h_outside["solexs_flux"] = h_outside["flux"]
+        h_outside["source"] = "HEL1OS Only (Outside SoLEXS coverage)"
+        parts.append(h_outside[["timestamp", "flux", "hel1os_flux", "solexs_flux", "source"]])
+        log.info(f"  + HEL1OS-only outside overlap: {len(h_outside):,} rows")
+
+    combined = pd.concat(parts, ignore_index=True).sort_values("timestamp").reset_index(drop=True)
+    log.info(f"  ✓ Final combined dataset: {len(combined):,} rows")
+    return combined
 
 
 def main():

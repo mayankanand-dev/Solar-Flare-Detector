@@ -1,6 +1,8 @@
 
-# Raw data (large FITS files - do not commit)
+# Raw and large generated data (do not commit)
 data/raw/
+data/processed/*.csv
+data/processed/.manifest.json
 *.fits
 *.zip
 

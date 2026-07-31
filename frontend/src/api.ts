@@ -77,6 +77,7 @@ export interface MetricsData {
     loss: number
     val_loss: number
     accuracy: number
+    val_accuracy?: number
   }[]
   weightage: {
     name: string
@@ -88,6 +89,44 @@ export interface MetricsData {
     TN: number
     FN: number
   }
+  precision?: number
+  recall?: number
+  f1_score?: number
+  feature_importances?: Record<string, number>
+  predict_horizon_minutes?: number
+  trained_at?: string
+  n_train_samples?: number
+  n_test_samples?: number
+  note?: string
+}
+
+export interface ValidationData {
+  detected?: number
+  noaa_events?: number
+  true_positives?: number
+  false_positives?: number
+  false_negatives?: number
+  precision?: number
+  recall?: number
+  f1_score?: number
+  tolerance_minutes?: number
+  note?: string
+  matches?: Array<{
+    our_flare_id: number
+    our_class: string
+    our_time: string
+    noaa_class: string
+    noaa_time: string
+    delta_minutes: number
+  }>
+}
+
+export interface PredictionData {
+  flare_probability: number
+  predicted_class: string
+  confidence: string
+  horizon_minutes?: number
+  note?: string
 }
 
 // ── Fetch helpers ──────────────────────────────────────────────────────────
@@ -114,21 +153,23 @@ export const api = {
   getMetrics: (): Promise<MetricsData> =>
     apiFetch('/metrics.json'),
 
+  getValidation: (): Promise<ValidationData> =>
+    apiFetch('/validation.json'),
+
+  getPrediction: (): Promise<{ predictions: Array<{ timestamp: string; flare_probability: number }>; horizon_minutes?: number }> =>
+    apiFetch('/prediction_sample.json'),
+
   // Simulated endpoints for static hosting
   getFlareDetail: async (id: number): Promise<FlareDetail> => {
     const [flaresRes, lcRes] = await Promise.all([
       api.getFlares(),
       api.getLightcurve()
     ])
-    
+
     const flare = flaresRes.flares.find(f => f.id === id)
     if (!flare) throw new Error('Flare not found')
 
-    // Find a window in the lightcurve (roughly around the flare peak)
-    // The peak time is flare.peak_time
     const peakTime = new Date(flare.peak_time).getTime()
-    
-    // Simulate 1 hour before and 2 hours after
     const startWindow = peakTime - (1 * 60 * 60 * 1000)
     const endWindow = peakTime + (2 * 60 * 60 * 1000)
 
@@ -155,7 +196,6 @@ export const api = {
   },
 
   getReplayStatus: async (): Promise<ReplayStatus> => {
-    // Static mock for replay status since there is no backend
     return {
       current_idx: 0,
       current_time: new Date().toISOString(),

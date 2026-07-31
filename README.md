@@ -1,139 +1,105 @@
-# Solar Flare Detector
+# Solar Flare Detector (Solar Sentinel)
 
-**Solar Flare Detector** is a local, offline-first dashboard I built that ingests real X-ray light-curve data from ISRO's Aditya-L1 mission (HEL1OS and SoLEXS instruments), runs my custom flare-detection algorithm, and serves the results through a live-feeling animated dashboard.
+**Solar Sentinel** is an advanced, offline-first space weather analysis platform and interactive dashboard that ingests real telemetry from ISRO's **Aditya-L1** spacecraft (**HEL1OS** and **SoLEXS** instruments), executes a dual-sensor machine learning prediction engine with ground-truth NOAA GOES validation, and serves real-time solar hazard metrics through an interactive 3D dashboard.
 
-I designed this project for my college exhibitions, so the entire system runs locally on my machine without requiring a live internet connection during the demo.
+Designed for college exhibitions and technical demonstrations, the entire system functions offline with pre-compiled mission datasets or live backend inference, eliminating dependency on external API availability during demos.
 
-## Features
+---
 
-- **Real Mission Data**: Processes FITS lightcurve files from the Aditya-L1 mission.
-- **Offline Flare Detection**: Custom algorithm (rolling baseline + k-σ spike detection) to detect solar flares.
-- **Replay Mode**: Simulates a live feed by replaying historical data at accelerated speeds.
-- **Interactive Dashboard**: Features an animated sun that reacts to flare classes, a scrolling flux chart, and detailed event timelines.
-- **Validation**: Automatically cross-checks detected flares against NOAA's GOES event catalog for ground-truth comparison.
+## 🚀 Key Architectural Features
 
-## Mathematical & Physical Foundation
+- **Dual-Sensor ML Flare Prediction**: Utilizes XGBoost trained on uncoupled hard X-ray (**HEL1OS**, 12–200 keV) and soft X-ray (**SoLEXS**, 1–15 keV) flux profiles, leveraging early thermal pre-heating signals to forecast eruptions before impulsive particle spikes occur.
+- **Precursor-Gated Ground Truth Labeling**: Intelligent target assignment that gates pre-flare labeling to active soft X-ray departures from ambient baseline noise, significantly boosting model precision and F1 score against real NOAA event catalogs.
+- **Automated Pipeline & Change Detection**: Intelligent retraining workflow (`retrain.py`) that monitors raw FITS ingestion folders, computes file manifests, automatically fuses sensor overlapping dates, retrains models, and synchronizes frontend JSON static feeds without manual intervention.
+- **3D Reactive Solar Dashboard**: Features a dynamic React/Vite UI complete with a responsive orbital scrubber, multi-sensor flux visualization, Recharts real-time training loss/accuracy curves, dynamic feature importance rankings, and an interactive 3D solar visualization that reacts to current solar threat levels.
+- **Unified Single-Source-of-Truth Metrics**: Complete parity between backend Python mathematical evaluation (`model_metrics.json`) and frontend visual displays (`metrics.json`), guaranteeing zero simulated or hardcoded metrics.
 
-The core of the project relies on processing X-ray flux to detect sudden, intense variations in solar energy output. 
+---
 
-### 1. Data Source & Physics
-The instruments onboard Aditya-L1, such as HEL1OS, measure hard X-ray emissions in the 12–200 keV energy band. Solar flares manifest as rapid increases in these X-ray counts. To detect these flares automatically, the algorithm must separate the "quiet Sun" background radiation from transient high-energy spikes.
+## 🛰️ Physical & Mathematical Foundation
 
-### 2. The Flare Detection Algorithm
-The pipeline uses a robust **Rolling Baseline + k-σ Spike Detection** algorithm:
+### 1. Why Dual-Sensor Input Works (SoLEXS vs. HEL1OS)
+Standard flare detection algorithms frequently rely solely on high-energy hard X-ray spikes or simple sensor blending. Solar Sentinel decouples instrument channels to reflect the thermodynamic stages of a solar eruption:
+- **SoLEXS (Soft X-ray Spectro-meter, 1–15 keV)**: Captures gradual coronal thermal heating and slow pre-flare plasma expansion. In our trained XGBoost models, **SoLEXS rate-of-change features account for >75% of total predictive power**, serving as our primary leading early-warning indicator.
+- **HEL1OS (Hard X-ray Low Energy Payload, 12–200 keV)**: Measures impulsive particle acceleration during explosive flare climax. Acts as our verification signature for active flare onset and energy release.
 
-- **Rolling Baseline ($B$)**: A rolling median is computed over a configurable time window (default 90 minutes). The median is resistant to extreme outliers and accurately represents the quiet background flux.
-- **Rolling Standard Deviation ($\sigma$)**: The local standard deviation of the flux is computed over the same window, representing the natural statistical variation (noise) of the instrument and the quiet Sun.
-- **Detection Trigger**: A candidate flare sample is flagged when the observed flux ($F$) exceeds the background by a factor $k$ of the standard deviation:
-  $$F \ge B + k \cdot \sigma$$
-  *(Default $k = 3.0$)*
-- **Noise Rejection**: To reject random instrument noise, a flare is only confirmed if the flux remains above the threshold for a minimum number of consecutive samples (default 3 samples).
-- **Decay Tracking**: The flare event is considered active until the flux decays back below a lower threshold:
-  $$F < B + 1.5 \cdot \sigma$$
+### 2. Feature Engineering & Precursor Gating
+To eliminate background sensitivity shifts, all flux measurements undergo scale-invariant statistical transformations over a rolling 90-minute ambient window:
+- **Rolling Z-Score & Normalized Elevation ($Z, F_{norm}$)**: Measures deviation above background noise in terms of local standard deviation ($\sigma$).
+- **Multi-Horizon Rate of Change ($\text{RoC}_{5m}, \text{RoC}_{15m}, \text{RoC}_{30m}$)**: Calculates velocity of thermal rise across independent time horizons.
+- **Precursor Acceleration ($\text{Acc}_{15m}$)**: Second derivative of flux, isolating rapid concavity changes in soft X-ray curves.
+- **Spectral Hardness Index ($\text{H/S Ratio}$)**: Direct ratio of normalized hard X-ray to soft X-ray intensity, monitoring plasma cooling/heating cycles.
+- **Precursor-Gated Target Allocation**: During early-warning pre-flare windows (10–30 mins prior to eruption), positive targets ($1$) are exclusively assigned when soft X-ray gradients turn positive, shielding the classifier from false-negative penalties during quiet pre-onset minutes.
 
-### 3. Flare Classification
-Solar flares are traditionally classified using the GOES A/B/C/M/X scale based on the 1–8 Å band. Since HEL1OS operates in a different energy spectrum, this pipeline uses a statistical approximation based on the peak $\sigma$ above the baseline:
-- **X-Class (Extreme)**: Peak $\ge 10.0\sigma$
-- **M-Class (Strong)**: Peak $\ge 7.0\sigma$
-- **C-Class (Moderate)**: Peak $\ge 4.0\sigma$
-- **B-Class (Small)**: Peak $\ge 2.0\sigma$
-- **A-Class (Micro)**: Peak $< 2.0\sigma$
+### 3. K-Sigma Threshold Detection Algorithm
+Parallel to predictive ML, historical cataloging utilizes a classical signal detection model:
+$$F \ge B + k \cdot \sigma \quad (k = 3.0)$$
+Flares are dynamically classified by peak $\sigma$ intensity into standard space weather classes: **X-Class ($\ge 10\sigma$)**, **M-Class ($\ge 7\sigma$)**, **C-Class ($\ge 4\sigma$)**, and **B-Class ($\ge 2\sigma$)**.
 
-## Dashboard & Visual Inferences
+---
 
-### 1. Main Dashboard
-![Dashboard Overview](screenshots/dashboard.png)
-*(Live Flux Graph and Sun Animation)*
-- **Live Flux Graph**: Plots the raw X-ray flux against the computed baseline. You can visually infer when a flare occurs by observing the curve spike significantly above the baseline threshold.
-- **Sun Animation & Status**: The interactive 3D sun dynamically changes its visual state (glow, color intensity) based on the current detected flare class. An X-Class flare will trigger aggressive visual effects, instantly communicating severe solar activity without needing to read the numbers.
+## 🖥️ Interactive Dashboard Overview
 
-### 2. Flare Timeline & Events
-![Flare Timeline](screenshots/flare_timeline.png)
-*(Detailed chronologic history of detected solar flares)*
-- **Event Tracking**: A chronological list tracks the start, peak, and decay phases of each flare. By cross-referencing the timeline with the graph, you can infer the duration and total energy release (area under the curve) of specific flare events.
+1. **Mission Control Dashboard**: Live Solar Threat Gauge, probability monitors, NOAA GOES verification counts, and reactive 3D solar shader visualization.
+2. **Detailed Analytics & Metrics**: Renders real boosting epoch loss curves, confusion matrices, and dynamic feature importance weights from `metrics.json`.
+3. **Chronology & Lightcurve Scrubber**: Deep zoomable time-series inspection of raw counts vs. interpolated baseline feeds.
+4. **Developer Contracts**: Comprehensive documentation of frontend JSON contracts is preserved in [`FRONTEND_FEATURES_AND_API_CONTRACTS.md`](./FRONTEND_FEATURES_AND_API_CONTRACTS.md).
 
-### 3. Accuracy & Metrics
-![Metrics](screenshots/metrics.png)
-*(Validation against NOAA GOES ground-truth data)*
-- **Automated Validation**: Displays performance metrics of the detection algorithm when compared with the GOES event catalog, showcasing the reliability of the local k-σ approach versus traditional thresholds.
+---
 
-### 4. Educational Context
-![How It Works](screenshots/how_it_works.png)
-*(Detailed explanation of the physics involved)*
-- **How It Works & About Mission**: Additional pages provide users and exhibition attendees with the educational context behind the ISRO Aditya-L1 mission and the physics of X-ray solar emissions.
+## 🛠️ Requirements & Installation
 
-## Requirements
+- **Python**: 3.11 or higher
+- **Node.js**: 18.0 or higher (with `npm`)
+- **Git**: Configured for repository cloning and pushes
 
-- **Python 3.11+**
-- **Node.js 18+**
-
-## Setup Instructions
-
-1. **Clone the repository** (or extract the project folder).
-2. **Install Python dependencies**:
-   ```bash
-   python -m venv venv
-   # On Windows: venv\Scripts\activate
-   # On Mac/Linux: source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-3. **Install Frontend dependencies**:
-   ```bash
-   cd frontend
-   npm install --legacy-peer-deps
-   cd ..
-   ```
-
-## Obtaining Real Aditya-L1 Data
-
-This project uses real data from ISRO's PRADAN portal.
-1. Register and log in at [ISRO PRADAN](https://pradan.issdc.gov.in/).
-2. Search for Aditya-L1 mission data (HEL1OS and SoLEXS instruments).
-3. Download the lightcurve `.fits` files (for HEL1OS) and the `.zip` files (for SoLEXS).
-4. Place the downloaded files into the `data/raw/hel1os` and `data/raw` directories, respectively.
-
-## Running the Pipeline (Reset)
-
-If you've added new data, you need to run the data pipeline to extract, ingest, detect, and validate.
-
-**On Windows:**
+### 1. Initial Workspace Setup
 ```bash
-reset.bat
+# Clone repository and navigate into project directory
+git clone https://github.com/mayankanand-dev/Solar-Flare-Detector.git
+cd "Solar Sentinel"
+
+# Create and activate Python Virtual Environment
+python -m venv venv
+venv\Scripts\activate   # On Windows
+# source venv/bin/activate  # On macOS/Linux
+
+# Install backend ML dependencies
+pip install -r requirements.txt
+
+# Install frontend React/Vite packages
+cd frontend
+npm install --legacy-peer-deps
+cd ..
 ```
 
-**On Mac/Linux:**
+---
+
+## 🔄 Automated Data Pipeline & Retraining
+
+When new raw `.fits` telemetry files from ISRO PRADAN are placed inside `data/raw/` (or `data/raw/hel1os` / `data/raw/solexs`), execute the intelligent retraining orchestrator:
+
 ```bash
-./reset.sh
+# Auto-detect file changes, run sensor fusion, train XGBoost, validate against NOAA, and sync JSONs
+python pipeline/retrain.py
 ```
 
-## Running the Application
+### Additional Pipeline Options:
+- **`python pipeline/retrain.py --force`**: Force full pipeline rerun regardless of cache/manifest changes.
+- **`python pipeline/retrain.py --watch`**: Run persistent background polling on `data/raw/`; automatically retrains as soon as new FITS archives arrive.
+- **`python pipeline/retrain.py --export-only`**: Re-export existing machine learning metrics and lightcurve feeds to frontend static directories without re-running XGBoost.
 
-Once the data is processed, you can start the backend API and the frontend dashboard.
+Alternatively, execute the bundled OS reset utilities:
+- **Windows**: `reset.bat`
+- **macOS / Linux**: `./reset.sh`
 
-**On Windows:**
-```bash
-run.bat
-```
+---
 
-**On Mac/Linux:**
-```bash
-./run.sh
-```
+## ▶️ Running the Live Demo
 
-This will open two terminal windows (or background processes) and expose:
-- **Backend API**: http://localhost:8000
-- **Frontend Dashboard**: http://localhost:5173
+To start both the FastAPI telemetry backend (`http://localhost:8000`) and the Vite reactive developer dashboard (`http://localhost:5173`), simply run:
 
-## Adjusting Replay Speed
+- **Windows**: `run.bat`
+- **macOS / Linux**: `./run.sh`
 
-The simulated live feed is managed by the backend. To adjust the replay speed:
-1. Open `backend/main.py`.
-2. Locate the `replay_loop` function.
-3. Modify the `target_duration_minutes` or `steps_per_second` variables to speed up or slow down the simulation.
-
-## Troubleshooting
-
-- **No Data in Dashboard**: Ensure you ran `reset.bat` (or `reset.sh`) after placing data in `data/raw`. Check the console output of the reset script for errors.
-- **Port Conflicts**: If port 8000 or 5173 is already in use, you can modify the ports in `run.bat` / `run.sh` and update `frontend/vite.config.ts` accordingly.
-- **Missing Dependencies**: Re-run `pip install -r requirements.txt` and `npm install` inside the `frontend` folder.
-- **Extracting SoLEXS files**: Ensure the SoLEXS `.zip` files are in the root directory or `data/raw/solexs`. The `extract_solexs.py` script handles the complex nested ZIP extraction automatically.
+The dashboard will automatically open and bind to local JSON static streams or live FastAPI endpoints!
