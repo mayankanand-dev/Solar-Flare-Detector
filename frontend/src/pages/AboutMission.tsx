@@ -16,14 +16,14 @@ const instruments = [
     name: 'SoLEXS',
     full: 'Solar Low Energy X-ray Spectrometer',
     band: '1–15 keV (soft X-ray)',
-    goal: 'Measure solar X-ray flux, detect micro-flares and nanoflares',
+    goal: 'Measure soft X-ray flux (primary ML pre-flare thermal heating precursor)',
     highlight: true,
   },
   {
     name: 'HEL1OS',
     full: 'High Energy L1 Orbiting X-ray Spectrometer',
     band: '12–200 keV (hard X-ray)',
-    goal: 'Study energetic solar flares and particle acceleration',
+    goal: 'Study hard X-ray impulsive spikes (active eruption validation signature)',
     highlight: true,
   },
   {

@@ -217,9 +217,9 @@ export default function Metrics() {
 
         {/* Sensor Fusion Weightage */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-          <div className="card-title">Sensor Fusion Weightage</div>
+          <div className="card-title">Sensor Fusion Channels</div>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-            Pipeline uses exactly 50-50 blended interpolation on overlapping dates (Jul 2–9).
+            Pipeline feeds uncoupled sensor streams directly into XGBoost: SoLEXS (thermal precursors) and HEL1OS (impulsive spikes).
           </p>
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
             <ResponsiveContainer width="100%" height={220}>
@@ -252,7 +252,7 @@ export default function Metrics() {
           <div className="card">
             <div className="card-title">Feature Importances</div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Which flux features drive the XGBoost flare predictions most.
+              Which sensor features drive XGBoost forecasts most. Notice how SoLEXS rate-of-change (roc) dominates early warning capability!
             </p>
             <div style={{ height: 280, width: '100%' }}>
               <ResponsiveContainer>

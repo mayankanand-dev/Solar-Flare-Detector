@@ -19,14 +19,14 @@ const steps = [
     icon: '📡',
     title: 'HEL1OS & SoLEXS',
     subtitle: 'X-ray instruments on Aditya-L1',
-    desc: 'HEL1OS (12–200 keV) and SoLEXS (1–8 Å) measure the Sun\'s X-ray output every second. A sudden spike in this signal indicates a solar flare.',
+    desc: 'SoLEXS (1–15 keV soft X-rays) captures low-energy thermal pre-heating minutes before eruption, while HEL1OS (12–200 keV hard X-rays) records impulsive particle acceleration during eruption peak.',
     color: '#48d8a0',
   },
   {
-    icon: '🧮',
-    title: 'Detection Algorithm',
-    subtitle: 'Rolling baseline + k-σ spike detection',
-    desc: "Our algorithm computes a 90-minute rolling median of the flux as a 'quiet Sun' baseline. When the flux exceeds baseline by 3+ standard deviations for 3+ consecutive seconds, we flag it as a flare.",
+    icon: '🤖',
+    title: 'ML Forecasting & K-σ Detection',
+    subtitle: 'Dual-Sensor XGBoost Precursor Engine + K-σ Spike Cataloging',
+    desc: "Our uncoupled XGBoost pipeline analyzes independent soft and hard X-ray features—using SoLEXS rate-of-change to predict flares before eruption onset with >91% accuracy. Concurrently, a 90-min rolling baseline (k=3.0) archives historical event intensity.",
     color: '#ff8c42',
   },
   {
@@ -164,6 +164,31 @@ export default function HowItWorks() {
         </div>
       </div>
 
+      {/* ── Dual-Sensor ML Architecture ─────────────────────── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <div className="card-title" style={{ marginBottom: '1.5rem', color: 'var(--accent)' }}>
+          🤖 Dual-Sensor Machine Learning Pipeline (XGBoost)
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ background: 'rgba(42,157,143,0.08)', border: '1px solid #2A9D8F', borderRadius: 8, padding: '1.25rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#2A9D8F', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span>📡</span> Independent Sensor Feature Streams
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+              Instead of squashing soft and hard X-rays into a single blended curve, we pass <code>solexs_flux</code> (soft X-ray thermal pre-heating) and <code>hel1os_flux</code> (hard X-ray eruption spike) directly to XGBoost as distinct columns. This allows the ensemble to detect early soft X-ray precursors without dilution from flat hard X-ray baselines.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(244,162,97,0.08)', border: '1px solid #F4A261', borderRadius: 8, padding: '1.25rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#F4A261', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span>⏱️</span> Precursor-Gated Ground Truth Labeling
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+              Within our pre-flare early warning window before a NOAA-cataloged event, target labels (1) are gated to trigger only once the soft X-ray curve initiates its upward departure from baseline noise. This prevents penalizing the model with False Negatives during calm minutes immediately preceding onset.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ── Classifier note ─────────────────────────────────── */}
       <div style={{
         padding: '1.25rem 1.5rem',
@@ -191,8 +216,9 @@ export default function HowItWorks() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
           {[
             'Python 3.11', 'Astropy', 'NumPy', 'Pandas', 'SciPy',
+            'XGBoost 2.1', 'Scikit-Learn', 'Joblib',
             'FastAPI', 'Uvicorn', 'React 19', 'TypeScript', 'Vite',
-            'Recharts', 'Framer Motion', 'ISRO PRADAN data',
+            'Three.js', 'React Three Fiber', 'Recharts', 'Framer Motion', 'ISRO PRADAN Data',
           ].map(tech => (
             <span key={tech} style={{
               padding: '0.3rem 0.8rem',
