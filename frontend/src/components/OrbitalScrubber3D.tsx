@@ -92,11 +92,10 @@ function Sun({ isFlare, accentColor, reducedMotion }: { isFlare: boolean, accent
       {/* The Sun Body */}
       <mesh ref={sunRef}>
         <sphereGeometry args={[1.5, 64, 64]} />
-        <meshStandardMaterial 
-          map={sunTexture} 
-          color={sunTexture ? "#FFFFFF" : "#FF8C42"}
-          emissive="#331100" 
-          emissiveIntensity={0.5} 
+        <meshBasicMaterial 
+          key={sunTexture ? 'sun-tex-loaded' : 'sun-no-tex'}
+          map={sunTexture || null} 
+          color={sunTexture ? "#FFFFFF" : "#FF9900"} 
         />
       </mesh>
       
@@ -184,7 +183,12 @@ function EarthSystem({ reducedMotion }: { reducedMotion: boolean }) {
         {/* Earth */}
         <mesh ref={earthRef} position={[6, 0, 0]}>
           <sphereGeometry args={[0.3, 32, 32]} />
-          <meshStandardMaterial map={earthTexture} color={earthTexture ? "#FFFFFF" : "#4A90D9"} roughness={0.7} />
+          <meshStandardMaterial 
+            key={earthTexture ? 'earth-tex-loaded' : 'earth-no-tex'}
+            map={earthTexture || null} 
+            color={earthTexture ? "#FFFFFF" : "#4A90D9"} 
+            roughness={0.6} 
+          />
         </mesh>
 
         {/* Aditya-L1 Point (between Earth and Sun) */}
@@ -192,15 +196,15 @@ function EarthSystem({ reducedMotion }: { reducedMotion: boolean }) {
           {/* Satellite shape */}
           <mesh>
             <boxGeometry args={[0.1, 0.1, 0.1]} />
-            <meshStandardMaterial color="#FFD166" />
+            <meshBasicMaterial color="#FFD166" />
           </mesh>
           <mesh position={[0, 0, 0.15]}>
             <planeGeometry args={[0.05, 0.2]} />
-            <meshStandardMaterial color="#4A90D9" side={THREE.DoubleSide} />
+            <meshBasicMaterial color="#4A90D9" side={THREE.DoubleSide} />
           </mesh>
           <mesh position={[0, 0, -0.15]}>
             <planeGeometry args={[0.05, 0.2]} />
-            <meshStandardMaterial color="#4A90D9" side={THREE.DoubleSide} />
+            <meshBasicMaterial color="#4A90D9" side={THREE.DoubleSide} />
           </mesh>
           
           <Html position={[0, 0.35, 0]} center>
@@ -230,8 +234,9 @@ function Scene({ isFlare, activeFlare, accentColor, reducedMotion }: any) {
   return (
     <>
       {/* Lighting */}
-      <ambientLight intensity={0.5} />
-      <pointLight position={[0, 0, 0]} intensity={100} distance={20} decay={2} color="#FFF9ED" />
+      <ambientLight intensity={1.5} />
+      <pointLight position={[0, 0, 0]} intensity={300} distance={50} decay={1} color="#FFF9ED" />
+      <directionalLight position={[5, 3, 5]} intensity={1.2} color="#FFFFFF" />
 
       {/* Bodies */}
       <Sun isFlare={isFlare} accentColor={accentColor} reducedMotion={reducedMotion} />
