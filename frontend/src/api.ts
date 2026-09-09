@@ -89,15 +89,55 @@ export interface MetricsData {
     TN: number
     FN: number
   }
+  accuracy?: number
   precision?: number
   recall?: number
   f1_score?: number
+  roc_auc?: number
+  pr_auc?: number
+  optimal_threshold?: number
   feature_importances?: Record<string, number>
   predict_horizon_minutes?: number
   trained_at?: string
   n_train_samples?: number
   n_test_samples?: number
   note?: string
+  data_source?: string
+  noaa_events_used?: string
+  paper_benchmark_10fold_cv?: {
+    reference: string
+    accuracy: number
+    accuracy_std?: number
+    roc_auc: number
+    roc_auc_std?: number
+    pr_auc: number
+    pr_auc_std?: number
+    f1_score: number
+    f1_score_std?: number
+    precision: number
+    recall: number
+  }
+  mx_class_prediction?: {
+    reference: string
+    f1_score: number
+    precision: number
+    recall: number
+    accuracy: number
+    roc_auc: number
+  }
+  full_mission_backtest?: {
+    TP: number
+    FP: number
+    TN: number
+    FN: number
+    precision: number
+    recall: number
+    f1_score: number
+    accuracy: number
+    roc_auc: number
+    pr_auc: number
+    note?: string
+  }
 }
 
 export interface ValidationData {

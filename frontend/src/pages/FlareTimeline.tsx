@@ -45,9 +45,9 @@ export default function FlareTimeline() {
       <div style={{ marginBottom: '2rem' }}>
         <h1 className="section-title">Flare Timeline</h1>
         <p className="section-subtitle">
-          All {flares.length} solar flare events detected from real Aditya-L1 HEL1OS data
-          (July 2–10, 2026). Classification uses GOES-style thresholds as an approximation
-          — HEL1OS operates in 12–200 keV, not the standard GOES 1–8 Å band.
+          All {flares.length} solar flare events cataloged from real Aditya-L1 HEL1OS + SoLEXS observations
+          (February 2024 – July 2026). Events are detected via rolling k-σ spike analysis and cross-referenced
+          with NOAA SWPC GOES X-ray event catalogs.
         </p>
       </div>
 

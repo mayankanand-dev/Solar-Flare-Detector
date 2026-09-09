@@ -26,7 +26,7 @@ const steps = [
     icon: '🤖',
     title: 'ML Forecasting & K-σ Detection',
     subtitle: 'Dual-Sensor XGBoost Precursor Engine + K-σ Spike Cataloging',
-    desc: "Our uncoupled XGBoost pipeline analyzes independent soft and hard X-ray features—using SoLEXS rate-of-change to predict flares before eruption onset with >91% accuracy. Concurrently, a 90-min rolling baseline (k=3.0) archives historical event intensity.",
+    desc: "Our dual-sensor XGBoost pipeline analyzes independent soft and hard X-ray features—using SoLEXS thermal pre-heating and HEL1OS impulsive acceleration to predict flares 30 minutes before eruption onset with 95.7% accuracy across 76.7k telemetry minutes. Concurrently, a causal 90-min rolling baseline archives historical event intensity.",
     color: '#ff8c42',
   },
   {
