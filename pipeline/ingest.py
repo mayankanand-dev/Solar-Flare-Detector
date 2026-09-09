@@ -16,6 +16,7 @@ import logging
 import sys
 from pathlib import Path
 from typing import Optional
+import zipfile
 
 import numpy as np
 import pandas as pd
@@ -185,6 +186,43 @@ def ingest_directory(
     - Outside the overlap, use whichever instrument has data (labeled clearly)
     - Saves per-instrument CSVs to data/processed/ for ML feature engineering
     """
+    # ── Automatically extract FITS files from downloaded PRADAN ZIP packages ──
+    zip_files = sorted(input_dir.rglob("*.zip"))
+    if zip_files:
+        log.info(f"Checking {len(zip_files):,} ZIP archives in {input_dir} for unextracted FITS files...")
+        extracted_count = 0
+        for zf_path in zip_files:
+            path_lower = str(zf_path).lower()
+            if "2026" not in path_lower:
+                continue
+            if "hel1os" in path_lower or "hls" in path_lower or "czt" in path_lower:
+                dest_dir = input_dir / "hel1os"
+            elif "solexs" in path_lower or "slx" in path_lower or "sdd" in path_lower:
+                dest_dir = input_dir / "solexs"
+            else:
+                dest_dir = input_dir
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            
+            try:
+                with zipfile.ZipFile(zf_path, 'r') as z:
+                    for name in z.namelist():
+                        name_lower = name.lower()
+                        # Extract FITS lightcurves while ignoring GTI calibration, spectra, and massive photon event files
+                        if name_lower.endswith(".fits") and not any(k in name_lower for k in ["gti", "spectra", "cal", "hk", "evt", "event"]):
+                            # Prepend archive basename to prevent filename collisions across daily observator bundles
+                            filename = f"{zf_path.stem}__{Path(name).name}"
+                            target_path = dest_dir / filename
+                            if not target_path.exists():
+                                with z.open(name) as src, open(target_path, "wb") as dst:
+                                    dst.write(src.read())
+                                extracted_count += 1
+            except Exception as e:
+                log.warning(f"Failed to inspect or extract {zf_path.name}: {e}")
+        if extracted_count > 0:
+            log.info(f"  ✓ Extracted {extracted_count:,} new FITS observation files from PRADAN ZIP archives!")
+        else:
+            log.info("  ✓ All ZIP archives already extracted up-to-date.")
+
     fits_files = sorted(input_dir.rglob("*.fits"))
 
     if not fits_files:
@@ -197,6 +235,9 @@ def ingest_directory(
     
     for f in fits_files:
         path_str = str(f).lower()
+        # Skip auxiliary GTI/spectra/calibration/event files and pre-2026 files during ingestion
+        if any(k in path_str for k in ["gti", "spectra", "cal", "hk", "evt", "event"]) or "2026" not in path_str:
+            continue
         if "hel1os" in path_str or "hls" in path_str or "czt" in path_str:
             hel1os_files.append(f)
         elif "solexs" in path_str or "slx" in path_str or "sdd" in path_str:
@@ -230,6 +271,7 @@ def ingest_directory(
     if frames:
         df_hel1os = pd.concat(frames, ignore_index=True).sort_values("timestamp").drop_duplicates("timestamp")
         df_hel1os["timestamp"] = pd.to_datetime(df_hel1os["timestamp"], utc=True)
+        df_hel1os = df_hel1os[df_hel1os["timestamp"] >= "2026-01-01T00:00:00Z"]
         
     # Read SoLEXS
     frames = []
@@ -242,6 +284,7 @@ def ingest_directory(
     if frames:
         df_solexs = pd.concat(frames, ignore_index=True).sort_values("timestamp").drop_duplicates("timestamp")
         df_solexs["timestamp"] = pd.to_datetime(df_solexs["timestamp"], utc=True)
+        df_solexs = df_solexs[df_solexs["timestamp"] >= "2026-01-01T00:00:00Z"]
 
     if df_hel1os.empty and df_solexs.empty:
         raise RuntimeError("No files parsed.")
@@ -343,6 +386,11 @@ def ingest_directory(
     h_outside = df_hel1os[
         (df_hel1os["timestamp"] < overlap_start) | (df_hel1os["timestamp"] > overlap_end)
     ].copy()
+    
+    # SoLEXS data OUTSIDE the overlap window (e.g. May 6 → Jul 2 before HEL1OS coverage starts)
+    s_outside = df_solexs[
+        (df_solexs["timestamp"] < overlap_start) | (df_solexs["timestamp"] > overlap_end)
+    ].copy()
 
     parts = [fused]
     if not h_outside.empty:
@@ -353,6 +401,15 @@ def ingest_directory(
         h_outside["source"] = "HEL1OS Only (Outside SoLEXS coverage)"
         parts.append(h_outside[["timestamp", "flux", "hel1os_flux", "solexs_flux", "source"]])
         log.info(f"  + HEL1OS-only outside overlap: {len(h_outside):,} rows")
+
+    if not s_outside.empty:
+        # Normalize SoLEXS-only data to same scale (0–1000 range) for Two-Tower ingestion
+        s_outside["flux"] = norm(s_outside["flux"]) * 1000
+        s_outside["solexs_flux"] = s_outside["flux"]
+        s_outside["hel1os_flux"] = s_outside["flux"]
+        s_outside["source"] = "SoLEXS Only (Outside HEL1OS coverage)"
+        parts.append(s_outside[["timestamp", "flux", "hel1os_flux", "solexs_flux", "source"]])
+        log.info(f"  + SoLEXS-only outside overlap: {len(s_outside):,} rows")
 
     combined = pd.concat(parts, ignore_index=True).sort_values("timestamp").reset_index(drop=True)
     log.info(f"  ✓ Final combined dataset: {len(combined):,} rows")

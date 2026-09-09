@@ -322,6 +322,20 @@ def main():
     df = pd.read_csv(args.input)
     log.info(f"Loaded {len(df):,} rows from {args.input}")
 
+    # For high-volume multi-year raw data (>200k rows), resample to 1-minute cadence for fast, robust baseline
+    if len(df) > 200_000:
+        log.info("High-volume lightcurve detected: resampling to 1-minute cadence for baseline detection...")
+        df["timestamp"] = pd.to_datetime(df["timestamp"].astype(str).str.slice(0, 19), utc=True)
+        cols_to_keep = ["timestamp", "flux"]
+        if "solexs_flux" in df.columns:
+            cols_to_keep.append("solexs_flux")
+        if "hel1os_flux" in df.columns:
+            cols_to_keep.append("hel1os_flux")
+        df = df[cols_to_keep].set_index("timestamp").resample("1min").mean().interpolate(method="time", limit=5).dropna().reset_index()
+        log.info(f"Resampled to {len(df):,} 1-minute windows for detection.")
+        if config.min_duration_samples > 2:
+            config.min_duration_samples = 2  # 2 minutes minimum at 1-minute cadence
+
     flares = detect_flares(df, config)
     print_summary(flares)
 

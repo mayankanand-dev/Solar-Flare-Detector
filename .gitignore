@@ -5,6 +5,11 @@ data/processed/*.csv
 data/processed/.manifest.json
 *.fits
 *.zip
+*.pdf
+
+# PRADAN download scripts (contain personal browser session cookies/tokens)
+hel1os_*.py
+solexs_*.py
 
 # Python
 venv/
