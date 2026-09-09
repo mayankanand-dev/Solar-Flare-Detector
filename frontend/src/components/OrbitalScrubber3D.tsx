@@ -273,38 +273,83 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onSc
     }
   }, [replay?.progress_pct, isManual])
 
+  // Map progress (0..100) to actual observation timestamp
+  const currentTimestamp = useMemo(() => {
+    if (!lc || !lc.timestamps || lc.timestamps.length === 0) return null
+    const idx = Math.min(
+      lc.timestamps.length - 1,
+      Math.max(0, Math.round((manualProgressPct / 100) * (lc.timestamps.length - 1)))
+    )
+    return lc.timestamps[idx]
+  }, [lc, manualProgressPct])
+
+  const currentMs = useMemo(() => {
+    return currentTimestamp ? new Date(currentTimestamp).getTime() : 0
+  }, [currentTimestamp])
+
   useEffect(() => {
-    if (!lc || lc.timestamps.length === 0 || !onScrubTime) return
-    const startTimeMs = new Date(lc.time_range?.start || lc.timestamps[0]).getTime()
-    const endTimeMs = new Date(lc.time_range?.end || lc.timestamps[lc.timestamps.length - 1]).getTime()
-    const currentMs = startTimeMs + (manualProgressPct / 100) * (endTimeMs - startTimeMs)
+    if (!currentMs || !onScrubTime) return
     onScrubTime(currentMs, manualProgressPct)
-  }, [lc, manualProgressPct, onScrubTime])
+  }, [currentMs, manualProgressPct, onScrubTime])
 
   const activeFlare = useMemo(() => {
-    if (!lc || lc.timestamps.length === 0) return null
-    const startTimeMs = new Date(lc.time_range?.start || lc.timestamps[0]).getTime()
-    const endTimeMs = new Date(lc.time_range?.end || lc.timestamps[lc.timestamps.length - 1]).getTime()
-    const currentMs = startTimeMs + (manualProgressPct / 100) * (endTimeMs - startTimeMs)
-
+    if (!currentMs || !flares || flares.length === 0) return null
     return flares.find(f => {
       const fStart = new Date(f.start_time).getTime()
       const fEnd = new Date(f.end_time).getTime()
-      return currentMs >= fStart && currentMs <= fEnd
+      const end = fEnd > fStart ? fEnd : fStart + 20 * 60 * 1000
+      return currentMs >= (fStart - 5 * 60 * 1000) && currentMs <= (end + 5 * 60 * 1000)
     }) || null
-  }, [lc, flares, manualProgressPct])
+  }, [currentMs, flares])
 
   const isFlare = !!activeFlare
   const activeClass = activeFlare?.flare_class || 'quiet'
   const accentColor = CLASS_COLORS[activeClass] || CLASS_COLORS.quiet
 
   const currentTimeDisplay = useMemo(() => {
-    if (!lc || lc.timestamps.length === 0) return 'Loading...'
-    const startTimeMs = new Date(lc.time_range?.start || lc.timestamps[0]).getTime()
-    const endTimeMs = new Date(lc.time_range?.end || lc.timestamps[lc.timestamps.length - 1]).getTime()
-    const currentMs = startTimeMs + (manualProgressPct / 100) * (endTimeMs - startTimeMs)
-    return new Date(currentMs).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'
-  }, [lc, manualProgressPct])
+    if (!currentTimestamp) return 'Loading...'
+    return currentTimestamp.slice(0, 16).replace('T', ' ') + ' UTC'
+  }, [currentTimestamp])
+
+  // Map each flare's start time to its position along the actual observation sequence
+  // and cluster markers within 1.2% of each other to avoid visual barcode clumping
+  const flareMarkers = useMemo(() => {
+    if (!lc || !lc.timestamps || lc.timestamps.length === 0 || !flares) return []
+    const tsMsList = lc.timestamps.map(t => new Date(t).getTime())
+    const totalPoints = tsMsList.length - 1
+    if (totalPoints <= 0) return []
+
+    const markers: Array<{ id: string | number; flare_class: string; pct: number; count: number }> = []
+    const sorted = [...flares].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+
+    for (const f of sorted) {
+      const fStartMs = new Date(f.start_time).getTime()
+      let low = 0, high = tsMsList.length - 1
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2)
+        if (tsMsList[mid] < fStartMs) low = mid + 1
+        else high = mid - 1
+      }
+      const idx = Math.max(0, Math.min(totalPoints, low))
+      const pct = (idx / totalPoints) * 100
+
+      const last = markers[markers.length - 1]
+      if (last && Math.abs(last.pct - pct) < 1.5) {
+        if (f.flare_class === 'X' || (f.flare_class === 'M' && last.flare_class !== 'X')) {
+          last.flare_class = f.flare_class
+        }
+        last.count += 1
+      } else {
+        markers.push({
+          id: f.id,
+          flare_class: f.flare_class,
+          pct: Math.max(1, Math.min(99, pct)),
+          count: 1,
+        })
+      }
+    }
+    return markers
+  }, [lc, flares])
 
   return (
     <div style={{ width: '100%', maxWidth: size, margin: '0 auto', textAlign: 'center' }}>
@@ -348,36 +393,39 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onSc
             {isManual ? <Play size={16} /> : <Pause size={16} />}
           </button>
           
-          <div style={{ position: 'relative', flex: 1, height: 24, display: 'flex', alignItems: 'center' }}>
-            {/* Markers */}
-            <div style={{ position: 'absolute', left: 0, right: 0, height: 4, top: 10, pointerEvents: 'none' }}>
-              {lc && flares.map(f => {
-                const startTimeMs = new Date(lc.time_range?.start || lc.timestamps[0]).getTime()
-                const endTimeMs = new Date(lc.time_range?.end || lc.timestamps[lc.timestamps.length - 1]).getTime()
-                const totalDur = endTimeMs - startTimeMs
+          <div style={{ position: 'relative', flex: 1, height: 28, display: 'flex', alignItems: 'center' }}>
+            {/* Scrubber Track Line */}
+            <div style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              height: 4,
+              background: 'var(--border)',
+              borderRadius: 2,
+              pointerEvents: 'none',
+            }} />
 
-                const fStartMs = new Date(f.start_time).getTime()
-                const startPct = Math.max(0, Math.min(100, ((fStartMs - startTimeMs) / totalDur) * 100))
-                
-                return (
-                  <div 
-                    key={f.id} 
-                    style={{
-                      position: 'absolute',
-                      left: `${startPct}%`,
-                      top: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: 6,
-                      height: 12,
-                      borderRadius: 2,
-                      backgroundColor: CLASS_COLORS[f.flare_class] || 'var(--solar-gold)',
-                      opacity: 0.8,
-                      zIndex: 1,
-                    }}
-                    title={`Class ${f.flare_class}`}
-                  />
-                )
-              })}
+            {/* Flare Milestone Markers */}
+            <div style={{ position: 'absolute', left: 0, right: 0, height: 14, pointerEvents: 'none' }}>
+              {flareMarkers.map(m => (
+                <div 
+                  key={m.id} 
+                  style={{
+                    position: 'absolute',
+                    left: `${m.pct}%`,
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: m.flare_class === 'M' || m.flare_class === 'X' ? 3 : 2,
+                    height: m.flare_class === 'M' || m.flare_class === 'X' ? 12 : 8,
+                    borderRadius: 1.5,
+                    backgroundColor: CLASS_COLORS[m.flare_class] || 'var(--solar-gold)',
+                    opacity: 0.85,
+                    zIndex: 1,
+                    boxShadow: m.flare_class === 'M' || m.flare_class === 'X' ? `0 0 4px ${CLASS_COLORS[m.flare_class]}` : 'none',
+                  }}
+                  title={`Class ${m.flare_class}${m.count > 1 ? ` (${m.count} events)` : ''}`}
+                />
+              ))}
             </div>
             
             <input 
@@ -388,7 +436,14 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onSc
                 setIsManual(true)
                 setManualProgressPct(parseFloat(e.target.value))
               }}
-              style={{ width: '100%', position: 'relative', zIndex: 2, cursor: 'pointer', accentColor: 'var(--accent)', opacity: 0.8, background: 'transparent' }}
+              style={{
+                width: '100%',
+                position: 'relative',
+                zIndex: 2,
+                cursor: 'pointer',
+                accentColor: 'var(--accent)',
+                background: 'transparent',
+              }}
             />
           </div>
         </div>
