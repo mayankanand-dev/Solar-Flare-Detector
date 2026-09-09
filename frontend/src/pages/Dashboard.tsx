@@ -201,7 +201,7 @@ export default function Dashboard() {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                  {currentPred?.timestamp ? new Date(currentPred.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'} UTC
+                  {currentPred?.timestamp ? new Date(currentPred.timestamp).toISOString().slice(11, 16) : '—'} UTC
                 </span>
                 <span style={{ fontSize: '1.6rem', fontWeight: 800, fontFamily: 'var(--font-mono)',
                   color: predProb >= 0.7 ? '#D8481E' : predProb >= 0.4 ? '#F4A261' : '#2A9D8F'

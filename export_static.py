@@ -110,68 +110,28 @@ def _export_prediction_sample(out_path: Path):
 
     try:
         import joblib
-        import numpy as np
         import pandas as pd
+        from pipeline.train_model import engineer_features, FEATURE_COLS
 
+        print("  Generating calibrated static predictions with pipeline engineer_features()...")
         model = joblib.load(model_path)
-        with open(metrics_path) as f:
-            metrics = json.load(f)
-        feature_cols = metrics.get("feature_cols", [])
-
         lc = pd.read_csv(lc_path)
-        lc["timestamp"] = pd.to_datetime(lc["timestamp"], format="ISO8601", utc=True)
-        lc = lc.sort_values("timestamp").reset_index(drop=True)
 
-        # Sample every 5 minutes through the dataset (using a 30-min rolling window for feature computation)
-        predictions = []
-        window_size = 30 * 60  # 30 min in seconds (at 1-second cadence)
-        step_size = 5 * 60     # 5 min sampling interval for high-resolution scrubbing
+        feat = engineer_features(lc, None, None, resample_freq="1min")
+        feat_cols = [c for c in FEATURE_COLS if c in feat.columns]
 
-        for i in range(window_size, len(lc), step_size):
-            window = lc.iloc[max(0, i - window_size):i]
-            flux = window["flux"].values.astype(float)
+        probs = model.predict_proba(feat[feat_cols].fillna(0).values)[:, 1]
+        feat["flare_probability"] = probs.round(4)
 
-            if len(flux) < 5:
-                continue
-
-            window_15 = flux[-15*60:] if len(flux) >= 15*60 else flux
-            window_90 = flux
-            med_90 = float(np.median(window_90)) if len(window_90) > 0 else float(flux[-1])
-            std_90 = float(np.std(window_90)) + 1e-6
-
-            val_curr = float(flux[-1])
-            val_5m   = float(flux[-min(len(flux), 300)])
-            val_15m  = float(flux[-min(len(flux), 900)])
-
-            s_flux = window["solexs_flux"].values.astype(float) if "solexs_flux" in window.columns else flux
-            h_flux = window["hel1os_flux"].values.astype(float) if "hel1os_flux" in window.columns else flux
-
-            val_curr_s, val_5m_s, val_15m_s, val_30m_s = s_flux[-1], s_flux[-min(len(s_flux), 300)], s_flux[-min(len(s_flux), 900)], s_flux[-min(len(s_flux), 1800)]
-            val_curr_h, val_5m_h = h_flux[-1], h_flux[-min(len(h_flux), 300)]
-            med_90_s, std_90_s = float(np.median(s_flux)), float(np.std(s_flux)) + 1e-6
-            med_90_h, std_90_h = float(np.median(h_flux)), float(np.std(h_flux)) + 1e-6
-
-            row = {
-                "solexs_zscore":  (val_curr_s - med_90_s) / std_90_s,
-                "solexs_norm":    (val_curr_s - med_90_s) / (abs(med_90_s) + 1e-6),
-                "solexs_roc_5m":  (val_curr_s - val_5m_s) / (abs(val_5m_s) + 1e-6),
-                "solexs_roc_15m": (val_curr_s - val_15m_s) / (abs(val_15m_s) + 1e-6),
-                "solexs_roc_30m": (val_curr_s - val_30m_s) / (abs(val_30m_s) + 1e-6),
-                "solexs_acc_15m": ((val_curr_s - val_15m_s) / (abs(val_15m_s) + 1e-6)) - ((val_5m_s - val_15m_s) / (abs(val_15m_s) + 1e-6)),
-                "hel1os_zscore":  (val_curr_h - med_90_h) / std_90_h,
-                "hel1os_roc_5m":  (val_curr_h - val_5m_h) / (abs(val_5m_h) + 1e-6),
-                "flux_zscore":    (val_curr - med_90) / std_90,
-                "std_ratio_15m":  float(np.std(window_15)) / std_90,
-                "max_ratio_15m":  (float(np.max(window_15)) - med_90) / std_90,
-                "h_s_ratio":      float(val_curr_h / (val_curr_s + 1e-6)),
-                "h_s_ratio_roc":  0.0,
+        # Sample every 5 minutes (step of 5 on 1-min resampled dataframe)
+        sampled = feat.iloc[::5]
+        predictions = [
+            {
+                "timestamp": ts.isoformat() if hasattr(ts, "isoformat") else str(ts),
+                "flare_probability": round(float(prob), 4),
             }
-            X = np.array([[row.get(c, 0.0) for c in feature_cols]])
-            prob = float(model.predict_proba(X)[0][1])
-            predictions.append({
-                "timestamp": lc.iloc[i]["timestamp"].isoformat(),
-                "flare_probability": round(prob, 3),
-            })
+            for ts, prob in zip(sampled["timestamp"], sampled["flare_probability"])
+        ]
 
         with open(out_path, "w") as f:
             json.dump({"predictions": predictions, "horizon_minutes": 30}, f)

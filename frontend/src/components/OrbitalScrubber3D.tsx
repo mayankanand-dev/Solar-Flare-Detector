@@ -308,7 +308,17 @@ export default function OrbitalScrubber3D({ replay, flares, lc, size = 500, onSc
 
   return (
     <div style={{ width: '100%', maxWidth: size, margin: '0 auto', textAlign: 'center' }}>
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', minHeight: '300px', background: 'transparent', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+      <div style={{ 
+        position: 'relative', 
+        width: '100%', 
+        aspectRatio: '16 / 9', 
+        minHeight: '300px', 
+        background: 'radial-gradient(ellipse at 50% 50%, #0d1224 0%, #05070e 100%)', 
+        borderRadius: 'var(--radius)', 
+        overflow: 'hidden', 
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.7)'
+      }}>
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 1.5, 10]} fov={45} />
           <Scene 
