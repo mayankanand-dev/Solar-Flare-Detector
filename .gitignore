@@ -1,5 +1,4 @@
-
-# Raw and large generated data (do not commit)
+# Raw and large generated data
 data/raw/
 data/processed/*.csv
 data/processed/.manifest.json
@@ -8,7 +7,7 @@ data/processed/.manifest.json
 *.pdf
 !figures/*.pdf
 
-# PRADAN download scripts (contain personal browser session cookies/tokens)
+# PRADAN download scripts
 hel1os_*.py
 solexs_*.py
 
@@ -32,11 +31,19 @@ build/
 .env.local
 .env.*.local
 
-# IDEs
+# IDEs & System
 .vscode/
 .idea/
 *.swp
-
-# OS
 .DS_Store
 Thumbs.db
+
+# Workspace metadata & developer utility scripts (do not push to GitHub)
+.agents/
+CLAUDE.md
+context.md
+IMPLEMENTATION_PLAN.md
+download_fonts.py
+download_textures.py
+capture_screenshots.py
+export_static.py
