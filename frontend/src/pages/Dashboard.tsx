@@ -119,7 +119,7 @@ export default function Dashboard() {
         fontSize: '0.85rem'
       }}>
         <span style={{ color: 'var(--text-secondary)' }}>
-          🚀 <strong>Research Update:</strong> 30-Minute Aditya-L1 dual-sensor forecasting manuscript & 7 high-res publication figures now available (10-Fold CV F1 = 0.772, TSS = 0.554).
+          🚀 <strong>Research Update:</strong> 30-Minute Aditya-L1 dual-sensor forecasting paper & 7 high-res publication figures now available (10-Fold CV F1 = 0.772, TSS = 0.554).
         </span>
         <Link to="/research" style={{ color: 'var(--accent)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
           Explore Research & Figures →

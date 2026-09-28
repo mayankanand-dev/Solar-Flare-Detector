@@ -88,7 +88,7 @@ export default function Metrics() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <Award size={20} color="var(--accent)" />
           <span style={{ fontSize: '0.88rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-            Official Research Paper Manuscript & 7 High-Res Publication Figures now available
+            Research Paper & 7 High-Res Publication Figures now available
           </span>
         </div>
         <Link

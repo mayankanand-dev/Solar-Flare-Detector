@@ -104,7 +104,7 @@ export default function ResearchPaper() {
         boxShadow: 'var(--shadow-card)'
       }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(42,157,143,0.15)', border: '1px solid #2A9D8F', borderRadius: 100, padding: '0.35rem 1rem', fontSize: '0.8rem', color: '#2A9D8F', fontWeight: 700, marginBottom: '1.25rem' }}>
-          <Award size={16} /> Official Peer-Reviewed Manuscript & Scientific Evaluation
+          <Award size={16} /> Research Paper & Scientific Evaluation
         </div>
 
         <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.25, marginBottom: '1rem', letterSpacing: '-0.02em' }}>
@@ -138,7 +138,7 @@ export default function ResearchPaper() {
             className="btn btn-primary"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', padding: '0.65rem 1.25rem', fontSize: '0.88rem' }}
           >
-            <Download size={16} /> Download Manuscript (.docx)
+            <Download size={16} /> Download Paper (.docx)
           </a>
           <a
             href="/solar_sentinel_research_paper.md"
@@ -311,7 +311,7 @@ export default function ResearchPaper() {
               </h2>
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-              High-resolution figures from the research manuscript. Click any figure to expand into full view.
+              High-resolution figures from the research paper. Click any figure to expand into full view.
             </p>
           </div>
 
@@ -410,7 +410,7 @@ export default function ResearchPaper() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
           <Layers size={22} color="#F4A261" />
           <h2 style={{ fontSize: '1.4rem', margin: 0, color: 'var(--text-primary)' }}>
-            Official Benchmark & Ablation Tables
+            Benchmark & Ablation Tables
           </h2>
         </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>

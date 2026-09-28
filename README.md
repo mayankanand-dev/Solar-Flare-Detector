@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="Solar_Sentinel_Research_Paper.docx"><strong>📄 Manuscript (.docx)</strong></a> •
+  <a href="Solar_Sentinel_Research_Paper.docx"><strong>📄 Research Paper (.docx)</strong></a> •
   <a href="solar_sentinel_research_paper.md"><strong>📖 Full Paper (.md)</strong></a> •
   <a href="PRADAN_DATASET_SPECSHEET.md"><strong>📊 Dataset Specsheet</strong></a> •
   <a href="figures/"><strong>🖼️ Publication Figures</strong></a>
