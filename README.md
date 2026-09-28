@@ -1,3 +1,12 @@
+<p align="center">
+  <a href="https://doi.org/10.5281/zenodo.23019457">
+    <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.23019457-007EC6?style=for-the-badge&logo=doi&logoColor=white" alt="DOI: 10.5281/zenodo.23019457" height="32" />
+  </a>
+  <a href="https://doi.org/10.5281/zenodo.23019457">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23019457.svg" alt="Zenodo Archive" height="32" />
+  </a>
+</p>
+
 # Solar Sentinel: Operational 30-Minute Solar Flare Early Warning via Dual-Sensor X-Ray Radiometry on ISRO Aditya-L1
 
 <p align="center">
@@ -5,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://doi.org/10.5281/zenodo.23019457"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23019457.svg" alt="DOI" /></a>
+  <a href="https://doi.org/10.5281/zenodo.23019457"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.23019457-007EC6?style=for-the-badge&logo=doi&logoColor=white" alt="DOI" /></a>
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11" />
   <img src="https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
