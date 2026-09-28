@@ -71,6 +71,42 @@ export interface Stats {
   source: string
 }
 
+export interface BaselineScore {
+  model: string
+  f1: number
+  precision: number
+  recall: number
+  accuracy: number
+  tp: number
+  fp: number
+  tn: number
+  fn: number
+  tss: number
+  hss: number
+  tpr?: number
+  fpr?: number
+  sigma_threshold?: number
+}
+
+export interface SensorAblationScore {
+  model: string
+  n_features: number
+  features_used: string[]
+  f1: number
+  precision: number
+  recall: number
+  roc_auc: number
+  pr_auc: number
+  tp: number
+  fp: number
+  tn: number
+  fn: number
+  tss: number
+  hss: number
+  tpr: number
+  fpr: number
+}
+
 export interface MetricsData {
   training_curves: {
     epoch: number
@@ -95,6 +131,10 @@ export interface MetricsData {
   f1_score?: number
   roc_auc?: number
   pr_auc?: number
+  tss?: number
+  hss?: number
+  tpr?: number
+  fpr?: number
   optimal_threshold?: number
   feature_importances?: Record<string, number>
   predict_horizon_minutes?: number
@@ -104,6 +144,16 @@ export interface MetricsData {
   note?: string
   data_source?: string
   noaa_events_used?: string
+  baselines?: {
+    persistence?: BaselineScore
+    k_sigma?: BaselineScore
+  }
+  ablations?: {
+    sensor?: {
+      solexs_only?: SensorAblationScore
+      hel1os_only?: SensorAblationScore
+    }
+  }
   paper_benchmark_10fold_cv?: {
     reference: string
     accuracy: number
@@ -116,6 +166,10 @@ export interface MetricsData {
     f1_score_std?: number
     precision: number
     recall: number
+    tss?: number
+    tss_std?: number
+    hss?: number
+    hss_std?: number
   }
   mx_class_prediction?: {
     reference: string
@@ -136,8 +190,60 @@ export interface MetricsData {
     accuracy: number
     roc_auc: number
     pr_auc: number
+    tss?: number
+    hss?: number
     note?: string
   }
+}
+
+export interface HorizonAblationItem {
+  horizon_minutes: number
+  f1: number
+  roc_auc: number
+  pr_auc: number
+  tss: number
+  hss: number
+  precision: number
+  recall: number
+}
+
+export interface MultiSeedMetrics {
+  seeds: number[]
+  per_seed: Array<{
+    seed: number
+    f1: number
+    roc_auc: number
+    pr_auc: number
+    tss: number
+    hss: number
+    precision: number
+    recall: number
+  }>
+  f1_mean: number
+  f1_std: number
+  roc_auc_mean: number
+  roc_auc_std: number
+  tss_mean: number
+  tss_std: number
+  hss_mean: number
+  hss_std: number
+  stable: boolean
+  note: string
+}
+
+export interface ShapRankingItem {
+  rank: number
+  feature: string
+  group: 'solexs' | 'hel1os' | 'cross' | 'ensemble'
+  mean_abs_shap: number
+  relative_importance: number
+}
+
+export interface ShapRanking {
+  computed_at: string
+  n_samples_shap: number
+  n_features: number
+  feature_ranking: ShapRankingItem[]
 }
 
 export interface ValidationData {
@@ -198,6 +304,15 @@ export const api = {
 
   getPrediction: (): Promise<{ predictions: Array<{ timestamp: string; flare_probability: number }>; horizon_minutes?: number }> =>
     apiFetch('/prediction_sample.json'),
+
+  getHorizonAblation: (): Promise<HorizonAblationItem[]> =>
+    apiFetch('/horizon_ablation.json'),
+
+  getMultiSeedMetrics: (): Promise<MultiSeedMetrics> =>
+    apiFetch('/multiseed_metrics.json'),
+
+  getShapRanking: (): Promise<ShapRanking> =>
+    apiFetch('/shap_feature_ranking.json'),
 
   // Simulated endpoints for static hosting
   getFlareDetail: async (id: number): Promise<FlareDetail> => {

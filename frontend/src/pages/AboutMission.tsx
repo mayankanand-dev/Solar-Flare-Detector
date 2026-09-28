@@ -264,6 +264,31 @@ export default function AboutMission() {
         <br /><br />
         <strong style={{ color: 'var(--flare-a)' }}>Assets:</strong> Sun and Earth 3D textures courtesy of <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer" style={{color: 'inherit', textDecoration: 'underline'}}>Solar System Scope / NASA</a>.
       </div>
+
+      {/* Authorship & Institutional Credit */}
+      <div style={{
+        marginTop: '1.5rem',
+        padding: '1.25rem 1.5rem',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius)',
+        fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6,
+      }}>
+        <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem', fontSize: '0.95rem' }}>
+          🎓 Academic Authorship & Engineering Team
+        </div>
+        <div>
+          <strong>Authors:</strong> Mayank Anand (Lead Architect & Author), Aditi Jha, Vidushi Kesharwani, Gauri Nandana M, Prakriti Wadhwani, Kasak Fitkariwala
+        </div>
+        <div style={{ marginTop: '0.2rem' }}>
+          <strong>Institution:</strong> School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, Madhya Pradesh 466114, India
+        </div>
+        <div style={{ marginTop: '0.5rem' }}>
+          <a href="/Solar_Sentinel_Research_Paper.docx" download style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+            Download Research Paper (.docx) →
+          </a>
+        </div>
+      </div>
     </div>
   )
 }

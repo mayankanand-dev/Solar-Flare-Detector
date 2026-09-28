@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route, NavLink, Link } from 'react-router-dom'
-import { Zap, Activity, BookOpen, Radio } from 'lucide-react'
+import { Zap, Activity, BookOpen, Radio, Award } from 'lucide-react'
 import Dashboard from './pages/Dashboard'
 import FlareTimeline from './pages/FlareTimeline'
 import FlareDetail from './pages/FlareDetail'
 import HowItWorks from './pages/HowItWorks'
 import AboutMission from './pages/AboutMission'
 import Metrics from './pages/Metrics'
+import ResearchPaper from './pages/ResearchPaper'
 
 function Navbar() {
   return (
@@ -41,7 +42,7 @@ function Navbar() {
             </defs>
           </svg>
           <div>
-            <div className="navbar-title">Solar Flare Detector</div>
+            <div className="navbar-title">Solar Sentinel</div>
             <div className="navbar-subtitle">Aditya-L1 · HEL1OS & SoLEXS</div>
           </div>
         </Link>
@@ -53,11 +54,14 @@ function Navbar() {
           <NavLink to="/flares" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
             <Zap size={15} /> Flare Timeline
           </NavLink>
-          <NavLink to="/how-it-works" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
-            <Radio size={15} /> How It Works
+          <NavLink to="/research" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Award size={15} /> Research & Figures
           </NavLink>
           <NavLink to="/metrics" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
             <Activity size={15} /> Accuracy & Metrics
+          </NavLink>
+          <NavLink to="/how-it-works" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Radio size={15} /> How It Works
           </NavLink>
           <NavLink to="/about" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
             <BookOpen size={15} /> About Mission
@@ -78,8 +82,10 @@ export default function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/flares" element={<FlareTimeline />} />
             <Route path="/flares/:id" element={<FlareDetail />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/research" element={<ResearchPaper />} />
+            <Route path="/stats" element={<ResearchPaper />} />
             <Route path="/metrics" element={<Metrics />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/about" element={<AboutMission />} />
           </Routes>
         </main>

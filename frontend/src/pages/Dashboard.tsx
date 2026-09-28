@@ -104,6 +104,28 @@ export default function Dashboard() {
 
   return (
     <div className="page-enter">
+      {/* ── Research Update Banner ────────────────────────────── */}
+      <div style={{
+        background: 'linear-gradient(90deg, rgba(74,144,217,0.12) 0%, rgba(42,157,143,0.12) 100%)',
+        border: '1px solid rgba(42,157,143,0.3)',
+        borderRadius: 'var(--radius)',
+        padding: '0.65rem 1.25rem',
+        marginBottom: '1.75rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.6rem',
+        fontSize: '0.85rem'
+      }}>
+        <span style={{ color: 'var(--text-secondary)' }}>
+          🚀 <strong>Research Update:</strong> 30-Minute Aditya-L1 dual-sensor forecasting manuscript & 7 high-res publication figures now available (10-Fold CV F1 = 0.772, TSS = 0.554).
+        </span>
+        <Link to="/research" style={{ color: 'var(--accent)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+          Explore Research & Figures →
+        </Link>
+      </div>
+
       {/* ── Centerpiece ──────────────────────────────────────── */}
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         
