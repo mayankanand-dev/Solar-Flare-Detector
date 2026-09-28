@@ -1,5 +1,5 @@
 {
-  "trained_at": "2026-09-09T17:15:26.946758+00:00",
+  "trained_at": "2026-09-28T11:43:10.700010+00:00",
   "predict_horizon_minutes": 30,
   "n_train_samples": 59504,
   "n_test_samples": 17280,
@@ -736,12 +736,49 @@
   "f1_score": 0.292,
   "roc_auc": 0.783,
   "pr_auc": 0.272,
+  "tss": 0.3175,
+  "hss": 0.255,
+  "tpr": 0.3672,
+  "fpr": 0.0497,
   "optimal_threshold": 0.68,
   "confusion_matrix": {
     "TP": 264,
     "FP": 823,
     "TN": 15738,
     "FN": 455
+  },
+  "baselines": {
+    "persistence": {
+      "model": "Persistence (y_pred[t] = y_obs[t], compared to y_true[t+horizon])",
+      "f1": 0.172,
+      "precision": 0.172,
+      "recall": 0.172,
+      "accuracy": 0.931,
+      "tp": 124,
+      "fp": 595,
+      "tn": 15936,
+      "fn": 595,
+      "tss": 0.1365,
+      "hss": 0.1365,
+      "tpr": 0.1725,
+      "fpr": 0.036
+    },
+    "k_sigma": {
+      "model": "k-sigma threshold (\u03c3=3.0)",
+      "sigma_threshold": 3.0,
+      "f1": 0.223,
+      "precision": 0.412,
+      "recall": 0.153,
+      "accuracy": 0.956,
+      "tp": 110,
+      "fp": 157,
+      "tn": 16404,
+      "fn": 609,
+      "tss": 0.1435,
+      "hss": 0.2052,
+      "tpr": 0.153,
+      "fpr": 0.0095
+    }
   },
   "paper_benchmark_10fold_cv": {
     "reference": "Bringewald & Parisot (MDPI Astronomy 2025, 4, 23)",
@@ -754,7 +791,11 @@
     "f1_score": 0.772,
     "f1_score_std": 0.019,
     "precision": 0.789,
-    "recall": 0.756
+    "recall": 0.756,
+    "tss": 0.554,
+    "tss_std": 0.035,
+    "hss": 0.554,
+    "hss_std": 0.035
   },
   "mx_class_prediction": {
     "reference": "Table A1 (Bringewald & Parisot 2025)",
@@ -775,7 +816,74 @@
     "accuracy": 0.957,
     "roc_auc": 0.893,
     "pr_auc": 0.471,
+    "tss": 0.4394,
+    "hss": 0.4565,
     "note": "Includes training data \u2014 continuous 76.7k telemetry operational coverage metric."
+  },
+  "ablations": {
+    "sensor": {
+      "solexs_only": {
+        "model": "solexs_only XGBoost (n_features=12)",
+        "n_features": 12,
+        "features_used": [
+          "solexs_zscore",
+          "solexs_norm",
+          "solexs_roc_5m",
+          "solexs_roc_15m",
+          "solexs_roc_30m",
+          "solexs_acc_15m",
+          "solexs_ewma_diff",
+          "flux_zscore",
+          "flux_macd",
+          "flux_acc_5m",
+          "std_ratio_15m",
+          "max_ratio_15m"
+        ],
+        "f1": 0.279,
+        "precision": 0.243,
+        "recall": 0.327,
+        "roc_auc": 0.798,
+        "pr_auc": 0.266,
+        "tp": 235,
+        "fp": 733,
+        "tn": 15828,
+        "fn": 484,
+        "tss": 0.2826,
+        "hss": 0.2424,
+        "tpr": 0.3268,
+        "fpr": 0.0443
+      },
+      "hel1os_only": {
+        "model": "hel1os_only XGBoost (n_features=11)",
+        "n_features": 11,
+        "features_used": [
+          "hel1os_zscore",
+          "hel1os_roc_1m",
+          "hel1os_roc_5m",
+          "hel1os_roc_15m",
+          "hel1os_acc_5m",
+          "hel1os_ewma_diff",
+          "flux_zscore",
+          "flux_macd",
+          "flux_acc_5m",
+          "std_ratio_15m",
+          "max_ratio_15m"
+        ],
+        "f1": 0.265,
+        "precision": 0.216,
+        "recall": 0.344,
+        "roc_auc": 0.771,
+        "pr_auc": 0.267,
+        "tp": 247,
+        "fp": 896,
+        "tn": 15665,
+        "fn": 472,
+        "tss": 0.2894,
+        "hss": 0.2258,
+        "tpr": 0.3435,
+        "fpr": 0.0541
+      }
+    }
   },
   "weightage": [
     {
@@ -813,5 +921,5 @@
   },
   "data_source": "Real Aditya-L1 HEL1OS + SoLEXS (ISRO PRADAN)",
   "noaa_events_used": "NOAA GOES X-ray flare catalog + full-mission spacecraft burst catalog",
-  "note": "Model evaluated under publication standards (Bringewald & Parisot, Astronomy 2025): 10-fold Stratified CV benchmark, M/X dangerous flare classification, 30% unseen daily block holdout, and full-mission continuous operational backtest."
+  "note": "Model evaluated under publication standards (Bringewald & Parisot, Astronomy 2025): 10-fold Stratified CV benchmark (with TSS/HSS), M/X dangerous flare classification, 30% unseen daily block holdout, full-mission continuous operational backtest, B1/B2 baselines (persistence + k-sigma), and B3/B4 sensor ablations."
 }

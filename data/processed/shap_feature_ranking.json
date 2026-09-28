@@ -1,0 +1,168 @@
+{
+  "computed_at": "2026-09-28T11:49:17.157149+00:00",
+  "n_samples_shap": 5000,
+  "n_features": 22,
+  "feature_ranking": [
+    {
+      "rank": 1,
+      "feature": "solexs_roc_5m",
+      "group": "solexs",
+      "mean_abs_shap": 0.633465,
+      "relative_importance": 0.21782
+    },
+    {
+      "rank": 2,
+      "feature": "h_s_ratio",
+      "group": "cross",
+      "mean_abs_shap": 0.55585,
+      "relative_importance": 0.191132
+    },
+    {
+      "rank": 3,
+      "feature": "solexs_zscore",
+      "group": "solexs",
+      "mean_abs_shap": 0.307928,
+      "relative_importance": 0.105882
+    },
+    {
+      "rank": 4,
+      "feature": "energy_partition_idx",
+      "group": "cross",
+      "mean_abs_shap": 0.267431,
+      "relative_importance": 0.091957
+    },
+    {
+      "rank": 5,
+      "feature": "flux_zscore",
+      "group": "ensemble",
+      "mean_abs_shap": 0.177188,
+      "relative_importance": 0.060927
+    },
+    {
+      "rank": 6,
+      "feature": "solexs_roc_15m",
+      "group": "solexs",
+      "mean_abs_shap": 0.164412,
+      "relative_importance": 0.056534
+    },
+    {
+      "rank": 7,
+      "feature": "solexs_ewma_diff",
+      "group": "solexs",
+      "mean_abs_shap": 0.097155,
+      "relative_importance": 0.033407
+    },
+    {
+      "rank": 8,
+      "feature": "solexs_roc_30m",
+      "group": "solexs",
+      "mean_abs_shap": 0.09371,
+      "relative_importance": 0.032223
+    },
+    {
+      "rank": 9,
+      "feature": "h_s_ratio_roc",
+      "group": "cross",
+      "mean_abs_shap": 0.083858,
+      "relative_importance": 0.028835
+    },
+    {
+      "rank": 10,
+      "feature": "hel1os_zscore",
+      "group": "hel1os",
+      "mean_abs_shap": 0.081924,
+      "relative_importance": 0.02817
+    },
+    {
+      "rank": 11,
+      "feature": "max_ratio_15m",
+      "group": "ensemble",
+      "mean_abs_shap": 0.080197,
+      "relative_importance": 0.027576
+    },
+    {
+      "rank": 12,
+      "feature": "hel1os_roc_5m",
+      "group": "hel1os",
+      "mean_abs_shap": 0.079773,
+      "relative_importance": 0.02743
+    },
+    {
+      "rank": 13,
+      "feature": "solexs_acc_15m",
+      "group": "solexs",
+      "mean_abs_shap": 0.061779,
+      "relative_importance": 0.021243
+    },
+    {
+      "rank": 14,
+      "feature": "solexs_norm",
+      "group": "solexs",
+      "mean_abs_shap": 0.054016,
+      "relative_importance": 0.018574
+    },
+    {
+      "rank": 15,
+      "feature": "std_ratio_15m",
+      "group": "ensemble",
+      "mean_abs_shap": 0.050009,
+      "relative_importance": 0.017196
+    },
+    {
+      "rank": 16,
+      "feature": "hel1os_roc_15m",
+      "group": "hel1os",
+      "mean_abs_shap": 0.033913,
+      "relative_importance": 0.011661
+    },
+    {
+      "rank": 17,
+      "feature": "flux_macd",
+      "group": "ensemble",
+      "mean_abs_shap": 0.028725,
+      "relative_importance": 0.009877
+    },
+    {
+      "rank": 18,
+      "feature": "hel1os_ewma_diff",
+      "group": "hel1os",
+      "mean_abs_shap": 0.024624,
+      "relative_importance": 0.008467
+    },
+    {
+      "rank": 19,
+      "feature": "hel1os_roc_1m",
+      "group": "hel1os",
+      "mean_abs_shap": 0.015068,
+      "relative_importance": 0.005181
+    },
+    {
+      "rank": 20,
+      "feature": "hel1os_acc_5m",
+      "group": "hel1os",
+      "mean_abs_shap": 0.008977,
+      "relative_importance": 0.003087
+    },
+    {
+      "rank": 21,
+      "feature": "flux_acc_5m",
+      "group": "ensemble",
+      "mean_abs_shap": 0.00818,
+      "relative_importance": 0.002813
+    },
+    {
+      "rank": 22,
+      "feature": "solexs_hel1os_surge",
+      "group": "cross",
+      "mean_abs_shap": 2.6e-05,
+      "relative_importance": 9e-06
+    }
+  ],
+  "group_contributions": {
+    "solexs": 0.4857,
+    "cross": 0.3119,
+    "ensemble": 0.1184,
+    "hel1os": 0.084
+  },
+  "note": "Mean absolute SHAP values on SDBP holdout test set. Groups: solexs=SoLEXS soft X-ray, hel1os=HEL1OS hard X-ray, cross=cross-sensor spectral features, ensemble=shared stability features."
+}
