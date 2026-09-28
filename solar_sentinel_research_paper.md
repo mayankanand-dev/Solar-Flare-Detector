@@ -1,12 +1,10 @@
 # Solar Sentinel: Operational 30-Minute Solar Flare Early Warning via Dual-Sensor X-Ray Radiometry on ISRO Aditya-L1
 
 **Authors:**  
-Mayank Anand $^{1,*}$, Research Co-Author A $^{1}$, Research Co-Author B $^{2}$, Research Co-Author C $^{2}$, Space Weather Domain Expert $^{3}$, Senior Principal Investigator $^{1}$
+Mayank Anand $^{1,*}$, Aditi Jha $^{1}$, Vidushi Kesharwani $^{1}$, Gauri Nandana M $^{1}$, Prakriti Wadhwani $^{1}$, Kasak Fitkariwala $^{1}$
 
-$^{1}$ Department of Computer Science & Engineering, Institute of Technology  
-$^{2}$ Department of Aerospace Engineering and Space Sciences, National Space Research Center  
-$^{3}$ Space Weather Prediction & Planetary Sciences Division  
-$^{*}$ Correspondence: mayankanand-dev (Lead System Architect & Corresponding Author)
+$^{1}$ Department of Computer Science & Engineering (Specialization in Artificial Intelligence & Machine Learning), School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, Kothrikalan, Sehore, Madhya Pradesh 466114, India  
+$^{*}$ Correspondence: Mayank Anand (Lead Architect & Author; institutional email: mayank.25bai11209@vitbhopal.ac.in, personal: dev.mayankanand@gmail.com)
 
 ---
 
