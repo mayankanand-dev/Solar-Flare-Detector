@@ -37,6 +37,7 @@ build/
 *.swp
 .DS_Store
 Thumbs.db
+~$*
 
 # Workspace metadata & developer utility scripts (do not push to GitHub)
 .agents/

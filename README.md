@@ -5,12 +5,13 @@
 </p>
 
 <p align="center">
+  <a href="https://doi.org/10.5281/zenodo.23019457"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23019457.svg" alt="DOI" /></a>
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11" />
   <img src="https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Aditya--L1-ISRO%20PRADAN-FF9933?style=for-the-badge" alt="ISRO Aditya-L1" />
   <img src="https://img.shields.io/badge/XGBoost-2.1-FF6600?style=for-the-badge" alt="XGBoost 2.1" />
-  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="MIT License" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
 <p align="center">
@@ -149,6 +150,8 @@ npm run dev
 
 ```
 Solar-Sentinel/
+├── CITATION.cff                         # Machine-readable citation metadata (Zenodo / CFF 1.2.0)
+├── LICENSE                              # MIT License
 ├── Solar_Sentinel_Research_Paper.docx   # Publication-ready manuscript (split layout, OMML math)
 ├── solar_sentinel_research_paper.md     # Full academic paper in Markdown
 ├── PRADAN_DATASET_SPECSHEET.md          # ISRO PRADAN Level-1 telemetry specification
@@ -183,8 +186,27 @@ $^{*}$ *Correspondence:* `mayank.25bai11209@vitbhopal.ac.in`
 
 ## 9. Citation
 
+If you use this repository, the dual-instrument telemetry pipeline, or the trained XGBoost model in your research, please cite our software release:
+
 ```bibtex
-@article{anand2026solarsentinel,
+@software{anand2026solarsentinel,
+  author    = {Anand, Mayank and Jha, Aditi and Kesharwani, Vidushi and 
+               M, Gauri Nandana and Wadhwani, Prakriti and Fitkariwala, Kasak},
+  title     = {Solar Sentinel: Operational 30-Minute Solar Flare Early Warning 
+               via Dual-Sensor X-Ray Radiometry on ISRO Aditya-L1},
+  month     = {sep},
+  year      = {2026},
+  publisher = {Zenodo},
+  version   = {v1.0.0},
+  doi       = {10.5281/zenodo.23019457},
+  url       = {https://doi.org/10.5281/zenodo.23019457}
+}
+```
+
+Or cite the research manuscript:
+
+```bibtex
+@article{anand2026solarsentinel_paper,
   author    = {Anand, Mayank and Jha, Aditi and Kesharwani, Vidushi and 
                M, Gauri Nandana and Wadhwani, Prakriti and Fitkariwala, Kasak},
   title     = {Solar Sentinel: Operational 30-Minute Solar Flare Early Warning 
@@ -192,9 +214,16 @@ $^{*}$ *Correspondence:* `mayank.25bai11209@vitbhopal.ac.in`
   journal   = {Astronomy},
   year      = {2026},
   publisher = {MDPI},
-  url       = {https://github.com/mayankanand-dev/Solar-Sentinel}
+  doi       = {10.5281/zenodo.23019457},
+  url       = {https://github.com/mayankanand-dev/Solar-Flare-Detector}
 }
 ```
+
+---
+
+## 10. License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 <p align="center">
   <strong>Data Credit:</strong> Telemetry sourced from <a href="https://pradan.issdc.gov.in/">ISRO PRADAN</a> (Aditya-L1 mission, HEL1OS and SoLEXS instruments). Ground-truth event catalogs provided by the <a href="https://www.swpc.noaa.gov/">NOAA Space Weather Prediction Center (SWPC)</a>.

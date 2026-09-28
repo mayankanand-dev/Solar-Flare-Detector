@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software, pipeline, or dataset in your research, please cite it as below."
+type: software
+authors:
+  - family-names: Anand
+    given-names: Mayank
+    email: mayank.25bai11209@vitbhopal.ac.in
+    affiliation: "Department of Computer Science & Engineering, School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, India"
+  - family-names: Jha
+    given-names: Aditi
+    affiliation: "Department of Computer Science & Engineering, School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, India"
+  - family-names: Kesharwani
+    given-names: Vidushi
+    affiliation: "Department of Computer Science & Engineering, School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, India"
+  - family-names: M
+    given-names: Gauri Nandana
+    affiliation: "Department of Computer Science & Engineering, School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, India"
+  - family-names: Wadhwani
+    given-names: Prakriti
+    affiliation: "Department of Computer Science & Engineering, School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, India"
+  - family-names: Fitkariwala
+    given-names: Kasak
+    affiliation: "Department of Computer Science & Engineering, School of Computing Science Engineering and Artificial Intelligence, VIT Bhopal University, India"
+title: "mayankanand-dev/Solar-Flare-Detector: v1.0.0 — Solar Sentinel: 30-Min Solar Flare Early Warning on ISRO Aditya-L1"
+version: 1.0.0
+doi: 10.5281/zenodo.23019457
+date-released: 2026-09-28
+url: "https://doi.org/10.5281/zenodo.23019457"
+repository-code: "https://github.com/mayankanand-dev/Solar-Flare-Detector"
+license: MIT
+keywords:
+  - "solar flare prediction"
+  - "isro aditya-l1"
+  - "solexs"
+  - "hel1os"
+  - "space weather"
+  - "xgboost"
+  - "dual-sensor radiometry"
+  - "early warning"
